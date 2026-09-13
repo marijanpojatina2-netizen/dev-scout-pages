@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 11.09.2026. 14:30</span>
+</header>
+<main>
+<h1>#40017 · Poreč, okolica - građevinsko zemljište s otvorenim pogledom</h1>
+<div class="sub">Poreč, Poreč, Istarska · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/porec-okolica-gradevinsko-zemljiste-otvorenim-pogledom-oglas-41540863" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">61</span>
+        <span class="muted">rule 61 · LLM – · 11.09.2026.</span></dd>
+      <dt>RLV</dt><dd>177.000 € (293 €/m²) · ratio <b>2,33</b></dd>
+      <dt>Ukupna investicija</dt><dd>1,17 M€</dd>
+      <dt>GBP</dt><dd>484 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>76.200 € (126 €/m²)</dd>
+      <dt>Površina</dt><dd>605 m²</dd>
+      <dt>Prodavatelj</dt><dd>agencija · San Martin Real Estate</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">76.200 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="obala: red uz more nepoznat (bez GIS-a)">sea_row_nepoznat</span> obala: red uz more nepoznat (bez GIS-a)<br><span class="flag soft" title="bez GIS obogaćivanja (M1)">bez_gis</span> bez GIS obogaćivanja (M1)<br><span class="flag soft" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span> zona preuzeta iz teksta oglasa (bez GIS-a)<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 484.0, &#39;kis&#39;: 0.8, &#39;nkp&#39;: 363.0, &#39;noi&#39;: None, &#39;rlv&#39;: 177265.0, &#39;ratio&#39;: 2.326312335958005, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;obala_visestambeno&#39;, &#39;gdv_neto&#39;: 1597200.0, &#39;cost_soft&#39;: 125840.0, &#39;gdv_bruto&#39;: 1996500.0, &#39;kis_known&#39;: False, &#39;total_inv&#39;: 1172326.0, &#39;cost_build&#39;: 968000.0, &#39;cost_sales&#39;: 59895.0, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 293.0, &#39;parcel_area&#39;: 605.0, &#39;parcelation&#39;: False, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 1172326.0, &#39;parcel_area_effective&#39;: 605.0, &#39;sale_price_per_m2_nkp&#39;: 5500.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;sea_row_nepoznat&#39;, &#39;bez_gis&#39;, &#39;zona_iz_oglasa&#39;, &#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;gradjevinska&#39;}, &#39;points&#39;: 10.0}, &#39;physical&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;bez GIS-a&#39;}, &#39;points&#39;: 4.0}, &#39;liquidity&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.0, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 1.0, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 0, &#39;points_private&#39;: 0}, &#39;points&#39;: 1.0}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 40.0, &#39;detail&#39;: {&#39;rlv&#39;: 177265, &#39;ratio&#39;: 2.326, &#39;asking_price&#39;: 76200.0}, &#39;points&#39;: 40.0}, &#39;zone_quality&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;oglas&#39;, &#39;zone_class&#39;: &#39;stambeno&#39;, &#39;zone_ideal&#39;: True}, &#39;points&#39;: 6.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;nema benchmarka ili cijene&#39;, &#39;ask_eur_m2&#39;: 125.9504132231405, &#39;benchmark_eur_m2&#39;: None}, &#39;points&#39;: 5.0}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zone_uncertainty&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">66,0</td></tr><tr><td>rlv_notes</td><td class="num">[&#39;sea_row nepoznat → pretpostavljen 2. red&#39;]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;total_inv&#39;: 1172326, &#39;zone_code&#39;: &#39;S&#39;, &#39;zone_class&#39;: &#39;stambeno&#39;, &#39;zone_source&#39;: &#39;oglas&#39;, &#39;zone_reviewed&#39;: None}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>–</dd>
+      <dt>Zona</dt><dd>S (–) · NIJE pregledana</dd>
+      <dt>kig / kis / katnost</dt><dd>– / – / –</dd>
+      <dt>GP / UPU</dt><dd>– · UPU ne</dd>
+      <dt>Pristup / nagib</dt><dd>– · – % (max – %)</dd>
+      <dt>More</dt><dd>– m · red – · ZOP –</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>–</dd>
+      <dt>Match</dt><dd>–</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/40017.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 484.0, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 0.8, &#39;source&#39;: &#39;default_profila&#39;}</td></tr><tr><td>sea_row</td><td class="num">{&#39;value&#39;: &#39;2&#39;, &#39;source&#39;: &#39;pretpostavka&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.13, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.75, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 605.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 76200.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>transfer_tax</td><td class="num">{&#39;value&#39;: 0.03, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.2, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 2000.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 5500.0, &#39;source&#39;: &#39;rlv.yaml:istra_zapad/row2&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table><tr><td>permit</td><td>gradjevinska</td></tr><tr><td>zone_claim</td><td>S</td></tr></table></div>
+<h2>Opis oglasa</h2><pre>Poreč, okolica - građevinsko zemljište s otvorenim pogledom
+Nedaleko od grada Poreča, u malom mjestu okruženom prelijepim krajolikom prodaje se građevinsko zemljište ukupne površine 605 m2. Dizanjem terena na zemljištu se omogućuje prekrasan pogled na Motovun i ostale brežuljke. 
+Zemljište je stambene namjene, sa svom potrebnom infrastrukturom u neposrednoj blizini. Pristup parceli će biti u narednom periodu omogućen i sproveden, kako bi parcela mogla dobiti građevinsku dozvolu.
+Zbog cijene te atraktivne lokacije ovo zemljište je prava prilika za investiciju i život.
+ID KOD AGENCIJE: 163
+Toni Kristijan
+Mob: +385 99 4028 788
+Tel: +385 99 4028 788
+E-mail: toni@sanmartin-realestate.com
+www.sanmartin-realestate.com</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.2292145448691, LNG = 13.597520155674468;
+var PARCELS = [];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

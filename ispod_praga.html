@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEV-SCOUT — ispod praga</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">DEV-SCOUT</a>
+  <a href="zagreb.html">Zagreb</a>
+  <a href="obala.html">Obala</a>
+  <a href="ispod_praga.html">Ispod praga</a>
+  <a href="offmarket.html">Off-market</a>
+  <a href="deepdive/index.html">Deep-dive</a>
+  <a href="review/index.html">Self-review</a>
+  <a href="stats.html">Statistika</a>
+  <span class="gen">generirano 13.09.2026. 15:19</span>
+</header>
+<main>
+<h1>DEV-SCOUT — ispod praga</h1>
+<div class="sub">Score 55–70 (nisu u Telegramu) · 69 oglasa</div>
+<div class="filters">
+  <label>Geo <select id="f-geo"><option value="">sve</option><option value="obala">obala</option></select></label>
+  <label>Tip <select id="f-cat"><option value="">svi</option><option value="kuca">kuca</option><option value="zemljiste">zemljiste</option></select></label>
+  <label>Score ≥ <input id="f-score" type="number" min="0" max="100" value="0" style="width:60px"></label>
+  <label>Flag <select id="f-flag"><option value="">bilo koji</option><option value="duplikati">duplikati</option><option value="kuca_za_rusenje">kuca_za_rusenje</option><option value="llm_pending">llm_pending</option><option value="natura_uz_gradnju">natura_uz_gradnju</option><option value="parcelacija">parcelacija</option><option value="rusenje_procjena">rusenje_procjena</option><option value="sea_row_nepoznat">sea_row_nepoznat</option><option value="zona_iz_oglasa">zona_iz_oglasa</option><option value="zona_provjeriti">zona_provjeriti</option><option value="zone_uncertainty">zone_uncertainty</option></select></label>
+  <label>Bez flaga <select id="f-noflag"><option value="">–</option><option value="duplikati">duplikati</option><option value="kuca_za_rusenje">kuca_za_rusenje</option><option value="llm_pending">llm_pending</option><option value="natura_uz_gradnju">natura_uz_gradnju</option><option value="parcelacija">parcelacija</option><option value="rusenje_procjena">rusenje_procjena</option><option value="sea_row_nepoznat">sea_row_nepoznat</option><option value="zona_iz_oglasa">zona_iz_oglasa</option><option value="zona_provjeriti">zona_provjeriti</option><option value="zone_uncertainty">zone_uncertainty</option></select></label>
+  <span class="muted" id="f-count"></span>
+</div>
+<div id="map"></div>
+<table id="tbl">
+<thead><tr>
+  <th data-k="id">#</th><th data-k="loc">Lokacija</th><th data-k="geo">Geo</th><th data-k="cat">Tip</th>
+  <th class="num" data-k="area">m²</th><th class="num" data-k="price">Cijena</th><th class="num" data-k="eurm2">€/m²</th>
+  <th data-k="zone">Zona</th><th class="num" data-k="gbp">GBP</th><th class="num" data-k="rlv">RLV €/m²</th>
+  <th class="num" data-k="ratio">Ratio</th><th class="num" data-k="score">Score</th><th data-k="flags">Flagovi</th>
+  <th class="num" data-k="dom">Dana</th><th data-k="fb">Feedback</th>
+</tr></thead>
+<tbody>
+<tr data-id="4860" data-geo="obala" data-cat="zemljiste" data-score="65.61"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.46898302098655" data-lng="14.278553887011046">
+  <td><a href="listing/4860.html">#4860</a></td>
+  <td>Rupa, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6765.00">6.765</td>
+  <td class="num" data-v="519000.00">519.000 €</td>
+  <td class="num" data-v="76.72">77</td>
+  <td>–</td>
+  <td class="num" data-v="4870.80">4.871</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.744">1,74</td>
+  <td class="num" data-v="65.61"><span class="score s-mid">65,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="35963" data-geo="obala" data-cat="zemljiste" data-score="64.92"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.417165107349916" data-lng="14.301109948309666">
+  <td><a href="listing/35963.html">#35963</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6422.00">6.422</td>
+  <td class="num" data-v="390000.00">390.000 €</td>
+  <td class="num" data-v="60.73">61</td>
+  <td>–</td>
+  <td class="num" data-v="4623.84">4.624</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.203">2,20</td>
+  <td class="num" data-v="64.92"><span class="score s-mid">64,9</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41442" data-geo="obala" data-cat="zemljiste" data-score="60.80"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.3652433" data-lng="14.2981623">
+  <td><a href="listing/41442.html">#41442</a></td>
+  <td>Rukavac, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="7078.00">7.078</td>
+  <td class="num" data-v="600000.00">600.000 €</td>
+  <td class="num" data-v="84.77">85</td>
+  <td>–</td>
+  <td class="num" data-v="5096.16">5.096</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.578">1,58</td>
+  <td class="num" data-v="60.80"><span class="score s-mid">60,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="36913" data-geo="obala" data-cat="zemljiste" data-score="60.68"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija kuca_za_rusenje zona_iz_oglasa llm_pending" data-lat="45.05928220228177" data-lng="13.820867646129761">
+  <td><a href="listing/36913.html">#36913</a></td>
+  <td>Krmed, Bale</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="7801.00">7.801</td>
+  <td class="num" data-v="645000.00">645.000 €</td>
+  <td class="num" data-v="82.68">83</td>
+  <td>–</td>
+  <td class="num" data-v="5616.72">5.617</td>
+  <td class="num" data-v="132.97">133</td>
+  <td class="num" data-v="1.608">1,61</td>
+  <td class="num" data-v="60.68"><span class="score s-mid">60,7</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="36746" data-geo="obala" data-cat="zemljiste" data-score="60.38"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.34404634535662" data-lng="14.292952048352161">
+  <td><a href="listing/36746.html">#36746</a></td>
+  <td>Bregi, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6432.00">6.432</td>
+  <td class="num" data-v="450000.00">450.000 €</td>
+  <td class="num" data-v="69.96">70</td>
+  <td>–</td>
+  <td class="num" data-v="4631.04">4.631</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.912">1,91</td>
+  <td class="num" data-v="60.38"><span class="score s-mid">60,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="38189" data-geo="obala" data-cat="zemljiste" data-score="59.93"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.41395786314148" data-lng="14.308014357291468">
+  <td><a href="listing/38189.html">#38189</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="7220.00">7.220</td>
+  <td class="num" data-v="430000.00">430.000 €</td>
+  <td class="num" data-v="59.56">60</td>
+  <td>–</td>
+  <td class="num" data-v="5198.40">5.198</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.246">2,25</td>
+  <td class="num" data-v="59.93"><span class="score s-mid">59,9</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43465" data-geo="obala" data-cat="zemljiste" data-score="59.23"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.31648452363166" data-lng="13.615384796099569">
+  <td><a href="listing/43465.html">#43465</a></td>
+  <td>Tar, Tar-Vabriga</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4385.00">4.385</td>
+  <td class="num" data-v="342000.00">342.000 €</td>
+  <td class="num" data-v="77.99">78</td>
+  <td>–</td>
+  <td class="num" data-v="3157.20">3.157</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.715">1,72</td>
+  <td class="num" data-v="59.23"><span class="score s-mid">59,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7056" data-geo="obala" data-cat="zemljiste" data-score="59.11"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija duplikati llm_pending" data-lat="45.378794600795956" data-lng="14.329561790921652">
+  <td><a href="listing/7056.html">#7056</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4130.00">4.130</td>
+  <td class="num" data-v="309000.00">309.000 €</td>
+  <td class="num" data-v="74.82">75</td>
+  <td>–</td>
+  <td class="num" data-v="2973.60">2.974</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.788">1,79</td>
+  <td class="num" data-v="59.11"><span class="score s-mid">59,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="500" data-geo="obala" data-cat="zemljiste" data-score="59.08"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="44.143711919574336" data-lng="15.575362880695252">
+  <td><a href="listing/500.html">#500</a></td>
+  <td>Pridraga, Novigrad</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4635.00">4.635</td>
+  <td class="num" data-v="370800.00">371.000 €</td>
+  <td class="num" data-v="80.00">80</td>
+  <td>–</td>
+  <td class="num" data-v="3337.20">3.337</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.672">1,67</td>
+  <td class="num" data-v="59.08"><span class="score s-mid">59,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="38404" data-geo="obala" data-cat="zemljiste" data-score="58.84"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.377504480724866" data-lng="14.321173339895076">
+  <td><a href="listing/38404.html">#38404</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4122.00">4.122</td>
+  <td class="num" data-v="298000.00">298.000 €</td>
+  <td class="num" data-v="72.30">72</td>
+  <td>–</td>
+  <td class="num" data-v="2967.84">2.968</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.851">1,85</td>
+  <td class="num" data-v="58.84"><span class="score s-mid">58,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4662" data-geo="obala" data-cat="zemljiste" data-score="58.79"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.385043311735664" data-lng="14.318920658614788">
+  <td><a href="listing/4662.html">#4662</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4130.00">4.130</td>
+  <td class="num" data-v="353000.00">353.000 €</td>
+  <td class="num" data-v="85.47">85</td>
+  <td>–</td>
+  <td class="num" data-v="2973.60">2.974</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.565">1,56</td>
+  <td class="num" data-v="58.79"><span class="score s-mid">58,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8056" data-geo="obala" data-cat="zemljiste" data-score="58.71"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija duplikati llm_pending" data-lat="45.38070996054399" data-lng="14.322242645367766">
+  <td><a href="listing/8056.html">#8056</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4122.00">4.122</td>
+  <td class="num" data-v="288540.00">289.000 €</td>
+  <td class="num" data-v="70.00">70</td>
+  <td>–</td>
+  <td class="num" data-v="2967.84">2.968</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.911">1,91</td>
+  <td class="num" data-v="58.71"><span class="score s-mid">58,7</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44596" data-geo="obala" data-cat="zemljiste" data-score="58.63"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.182560617936026" data-lng="13.634155993553067">
+  <td><a href="listing/44596.html">#44596</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="5716.00">5.716</td>
+  <td class="num" data-v="554000.00">554.000 €</td>
+  <td class="num" data-v="96.92">97</td>
+  <td>–</td>
+  <td class="num" data-v="4115.52">4.116</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.380">1,38</td>
+  <td class="num" data-v="58.63"><span class="score s-mid">58,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43271" data-geo="obala" data-cat="zemljiste" data-score="58.49"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.43437045269678" data-lng="13.516504581855033">
+  <td><a href="listing/43271.html">#43271</a></td>
+  <td>Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2500.00">2.500</td>
+  <td class="num" data-v="280000.00">280.000 €</td>
+  <td class="num" data-v="112.00">112</td>
+  <td>–</td>
+  <td class="num" data-v="2000.00">2.000</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.042">2,04</td>
+  <td class="num" data-v="58.49"><span class="score s-mid">58,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45649" data-geo="obala" data-cat="zemljiste" data-score="58.40"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.367164884043305" data-lng="13.622246639552015">
+  <td><a href="listing/45649.html">#45649</a></td>
+  <td>Brtonigla</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="5712.00">5.712</td>
+  <td class="num" data-v="296000.00">296.000 €</td>
+  <td class="num" data-v="51.82">52</td>
+  <td>–</td>
+  <td class="num" data-v="4112.64">4.113</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.582">2,58</td>
+  <td class="num" data-v="58.40"><span class="score s-mid">58,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41853" data-geo="obala" data-cat="zemljiste" data-score="58.26"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.22799016034163" data-lng="13.60277042029948">
+  <td><a href="listing/41853.html">#41853</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4000.00">4.000</td>
+  <td class="num" data-v="280000.00">280.000 €</td>
+  <td class="num" data-v="70.00">70</td>
+  <td>–</td>
+  <td class="num" data-v="2880.00">2.880</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.911">1,91</td>
+  <td class="num" data-v="58.26"><span class="score s-mid">58,3</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="6357" data-geo="obala" data-cat="zemljiste" data-score="57.92"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.21111756889026" data-lng="13.751919807014675">
+  <td><a href="listing/6357.html">#6357</a></td>
+  <td>Baderna, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3190.00">3.190</td>
+  <td class="num" data-v="270000.00">270.000 €</td>
+  <td class="num" data-v="84.64">85</td>
+  <td>–</td>
+  <td class="num" data-v="2296.80">2.297</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.581">1,58</td>
+  <td class="num" data-v="57.92"><span class="score s-mid">57,9</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42606" data-geo="obala" data-cat="zemljiste" data-score="57.83"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="44.146897743007194" data-lng="15.56908286578792">
+  <td><a href="listing/42606.html">#42606</a></td>
+  <td>Pridraga, Novigrad</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="5106.00">5.106</td>
+  <td class="num" data-v="255530.00">256.000 €</td>
+  <td class="num" data-v="50.05">50</td>
+  <td>–</td>
+  <td class="num" data-v="3676.32">3.676</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.673">2,67</td>
+  <td class="num" data-v="57.83"><span class="score s-mid">57,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="5773" data-geo="obala" data-cat="zemljiste" data-score="57.79"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.262182" data-lng="13.659044">
+  <td><a href="listing/5773.html">#5773</a></td>
+  <td>Nova Vas, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3050.00">3.050</td>
+  <td class="num" data-v="278000.00">278.000 €</td>
+  <td class="num" data-v="91.15">91</td>
+  <td>–</td>
+  <td class="num" data-v="2196.00">2.196</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.468">1,47</td>
+  <td class="num" data-v="57.79"><span class="score s-mid">57,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43594" data-geo="obala" data-cat="zemljiste" data-score="57.79"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.32501077271491" data-lng="13.564333666759007">
+  <td><a href="listing/43594.html">#43594</a></td>
+  <td>Novigrad</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4128.00">4.128</td>
+  <td class="num" data-v="385000.00">385.000 €</td>
+  <td class="num" data-v="93.27">93</td>
+  <td>–</td>
+  <td class="num" data-v="2972.16">2.972</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.434">1,43</td>
+  <td class="num" data-v="57.79"><span class="score s-mid">57,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45540" data-geo="obala" data-cat="zemljiste" data-score="57.78"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.429988679738344" data-lng="13.529044104889115">
+  <td><a href="listing/45540.html">#45540</a></td>
+  <td>Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6110.00">6.110</td>
+  <td class="num" data-v="611000.00">611.000 €</td>
+  <td class="num" data-v="100.00">100</td>
+  <td>–</td>
+  <td class="num" data-v="4399.20">4.399</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.338">1,34</td>
+  <td class="num" data-v="57.78"><span class="score s-mid">57,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="37161" data-geo="obala" data-cat="zemljiste" data-score="57.71"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.428561364521165" data-lng="13.530216654847097">
+  <td><a href="listing/37161.html">#37161</a></td>
+  <td>Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2400.00">2.400</td>
+  <td class="num" data-v="176000.00">176.000 €</td>
+  <td class="num" data-v="73.33">73</td>
+  <td>–</td>
+  <td class="num" data-v="1920.00">1.920</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="3.118">3,12</td>
+  <td class="num" data-v="57.71"><span class="score s-mid">57,7</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44231" data-geo="obala" data-cat="zemljiste" data-score="57.54"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti zona_iz_oglasa duplikati llm_pending" data-lat="45.376764846851785" data-lng="13.623382488185483">
+  <td><a href="listing/44231.html">#44231</a></td>
+  <td>Brtonigla</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2195.00">2.195</td>
+  <td class="num" data-v="307300.00">307.000 €</td>
+  <td class="num" data-v="140.00">140</td>
+  <td>–</td>
+  <td class="num" data-v="1756.00">1.756</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.633">1,63</td>
+  <td class="num" data-v="57.54"><span class="score s-mid">57,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="392" data-geo="obala" data-cat="zemljiste" data-score="57.43"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.21408749995022" data-lng="13.748534386111926">
+  <td><a href="listing/392.html">#392</a></td>
+  <td>Baderna, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3900.00">3.900</td>
+  <td class="num" data-v="240000.00">240.000 €</td>
+  <td class="num" data-v="61.54">62</td>
+  <td>–</td>
+  <td class="num" data-v="2808.00">2.808</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.174">2,17</td>
+  <td class="num" data-v="57.43"><span class="score s-mid">57,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="42018" data-geo="obala" data-cat="zemljiste" data-score="57.35"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.175864536037224" data-lng="14.223939861387269">
+  <td><a href="listing/42018.html">#42018</a></td>
+  <td>Brseč, Mošćenička Draga</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6510.00">6.510</td>
+  <td class="num" data-v="325000.00">325.000 €</td>
+  <td class="num" data-v="49.92">50</td>
+  <td>–</td>
+  <td class="num" data-v="4687.20">4.687</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.680">2,68</td>
+  <td class="num" data-v="57.35"><span class="score s-mid">57,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42029" data-geo="obala" data-cat="zemljiste" data-score="57.23"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.41499660310104" data-lng="14.305869637454089">
+  <td><a href="listing/42029.html">#42029</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4000.00">4.000</td>
+  <td class="num" data-v="249000.00">249.000 €</td>
+  <td class="num" data-v="62.25">62</td>
+  <td>–</td>
+  <td class="num" data-v="2880.00">2.880</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.149">2,15</td>
+  <td class="num" data-v="57.23"><span class="score s-mid">57,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="445" data-geo="obala" data-cat="zemljiste" data-score="57.21"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti zona_iz_oglasa llm_pending" data-lat="45.3638000140824" data-lng="14.329789929437162">
+  <td><a href="listing/445.html">#445</a></td>
+  <td>Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2500.00">2.500</td>
+  <td class="num" data-v="260000.00">260.000 €</td>
+  <td class="num" data-v="104.00">104</td>
+  <td>–</td>
+  <td class="num" data-v="2000.00">2.000</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.199">2,20</td>
+  <td class="num" data-v="57.21"><span class="score s-mid">57,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="8331" data-geo="obala" data-cat="zemljiste" data-score="57.15"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.42977709777427" data-lng="13.53444405990827">
+  <td><a href="listing/8331.html">#8331</a></td>
+  <td>Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4331.00">4.331</td>
+  <td class="num" data-v="230000.00">230.000 €</td>
+  <td class="num" data-v="53.11">53</td>
+  <td>–</td>
+  <td class="num" data-v="3118.32">3.118</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.519">2,52</td>
+  <td class="num" data-v="57.15"><span class="score s-mid">57,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="36403" data-geo="obala" data-cat="zemljiste" data-score="56.96"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija duplikati llm_pending" data-lat="45.36978074191678" data-lng="14.326130970719053">
+  <td><a href="listing/36403.html">#36403</a></td>
+  <td>Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2835.00">2.835</td>
+  <td class="num" data-v="226800.00">227.000 €</td>
+  <td class="num" data-v="80.00">80</td>
+  <td>–</td>
+  <td class="num" data-v="2041.20">2.041</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.672">1,67</td>
+  <td class="num" data-v="56.96"><span class="score s-mid">57,0</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="6682" data-geo="obala" data-cat="zemljiste" data-score="56.84"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.379366633149246" data-lng="14.322281541310929">
+  <td><a href="listing/6682.html">#6682</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3095.00">3.095</td>
+  <td class="num" data-v="245000.00">245.000 €</td>
+  <td class="num" data-v="79.16">79</td>
+  <td>–</td>
+  <td class="num" data-v="2228.40">2.228</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.690">1,69</td>
+  <td class="num" data-v="56.84"><span class="score s-mid">56,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42337" data-geo="obala" data-cat="zemljiste" data-score="56.72"
+    data-flags="natura_uz_gradnju sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.23161385954434" data-lng="13.593220240268215">
+  <td><a href="listing/42337.html">#42337</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2132.00">2.132</td>
+  <td class="num" data-v="234500.00">234.000 €</td>
+  <td class="num" data-v="109.99">110</td>
+  <td>–</td>
+  <td class="num" data-v="1705.60">1.706</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.079">2,08</td>
+  <td class="num" data-v="56.72"><span class="score s-mid">56,7</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41894" data-geo="obala" data-cat="zemljiste" data-score="56.63"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.162208900436035" data-lng="14.217310114876271">
+  <td><a href="listing/41894.html">#41894</a></td>
+  <td>Zagore, Mošćenička Draga</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3222.00">3.222</td>
+  <td class="num" data-v="250000.00">250.000 €</td>
+  <td class="num" data-v="77.59">78</td>
+  <td>–</td>
+  <td class="num" data-v="2319.84">2.320</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.724">1,72</td>
+  <td class="num" data-v="56.63"><span class="score s-mid">56,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44499" data-geo="obala" data-cat="zemljiste" data-score="56.58"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti zona_iz_oglasa llm_pending" data-lat="45.226725" data-lng="13.602844">
+  <td><a href="listing/44499.html">#44499</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2006.00">2.006</td>
+  <td class="num" data-v="185000.00">185.000 €</td>
+  <td class="num" data-v="92.22">92</td>
+  <td>–</td>
+  <td class="num" data-v="1604.80">1.605</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.479">2,48</td>
+  <td class="num" data-v="56.58"><span class="score s-mid">56,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44250" data-geo="obala" data-cat="zemljiste" data-score="56.54"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.22679989538634" data-lng="13.601332346877552">
+  <td><a href="listing/44250.html">#44250</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3708.00">3.708</td>
+  <td class="num" data-v="370000.00">370.000 €</td>
+  <td class="num" data-v="99.78">100</td>
+  <td>–</td>
+  <td class="num" data-v="2669.76">2.670</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.341">1,34</td>
+  <td class="num" data-v="56.54"><span class="score s-mid">56,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41657" data-geo="obala" data-cat="zemljiste" data-score="56.51"
+    data-flags="sea_row_nepoznat zona_provjeriti zona_iz_oglasa llm_pending" data-lat="45.36751269001439" data-lng="14.32515683757432">
+  <td><a href="listing/41657.html">#41657</a></td>
+  <td>Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1768.00">1.768</td>
+  <td class="num" data-v="176800.00">177.000 €</td>
+  <td class="num" data-v="100.00">100</td>
+  <td>–</td>
+  <td class="num" data-v="1414.40">1.414</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.287">2,29</td>
+  <td class="num" data-v="56.51"><span class="score s-mid">56,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45255" data-geo="obala" data-cat="zemljiste" data-score="56.48"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.215143907379" data-lng="13.661856486892">
+  <td><a href="listing/45255.html">#45255</a></td>
+  <td>Buići, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2970.00">2.970</td>
+  <td class="num" data-v="204930.00">205.000 €</td>
+  <td class="num" data-v="69.00">69</td>
+  <td>–</td>
+  <td class="num" data-v="2138.40">2.138</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.939">1,94</td>
+  <td class="num" data-v="56.48"><span class="score s-mid">56,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42122" data-geo="obala" data-cat="zemljiste" data-score="56.35"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.454092855677764" data-lng="14.304040143378705">
+  <td><a href="listing/42122.html">#42122</a></td>
+  <td>Lipa, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="5021.00">5.021</td>
+  <td class="num" data-v="200000.00">200.000 €</td>
+  <td class="num" data-v="39.83">40</td>
+  <td>–</td>
+  <td class="num" data-v="3615.12">3.615</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="3.359">3,36</td>
+  <td class="num" data-v="56.35"><span class="score s-mid">56,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43364" data-geo="obala" data-cat="zemljiste" data-score="56.35"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.20313208709806" data-lng="13.680883914791723">
+  <td><a href="listing/43364.html">#43364</a></td>
+  <td>Radmani, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1380.00">1.380</td>
+  <td class="num" data-v="170000.00">170.000 €</td>
+  <td class="num" data-v="123.19">123</td>
+  <td>–</td>
+  <td class="num" data-v="1104.00">1.104</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.856">1,86</td>
+  <td class="num" data-v="56.35"><span class="score s-mid">56,4</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43884" data-geo="obala" data-cat="zemljiste" data-score="56.34"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.21464869995525" data-lng="13.74896935273765">
+  <td><a href="listing/43884.html">#43884</a></td>
+  <td>Baderna, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2700.00">2.700</td>
+  <td class="num" data-v="205000.00">205.000 €</td>
+  <td class="num" data-v="75.93">76</td>
+  <td>–</td>
+  <td class="num" data-v="1944.00">1.944</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.762">1,76</td>
+  <td class="num" data-v="56.34"><span class="score s-mid">56,3</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42285" data-geo="obala" data-cat="zemljiste" data-score="56.22"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.36036923141142" data-lng="14.316031444982835">
+  <td><a href="listing/42285.html">#42285</a></td>
+  <td>Mihotići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2496.00">2.496</td>
+  <td class="num" data-v="250000.00">250.000 €</td>
+  <td class="num" data-v="100.16">100</td>
+  <td>–</td>
+  <td class="num" data-v="1996.80">1.997</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.283">2,28</td>
+  <td class="num" data-v="56.22"><span class="score s-mid">56,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42042" data-geo="obala" data-cat="zemljiste" data-score="56.18"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.41514058026073" data-lng="14.30456251499663">
+  <td><a href="listing/42042.html">#42042</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3129.00">3.129</td>
+  <td class="num" data-v="195000.00">195.000 €</td>
+  <td class="num" data-v="62.32">62</td>
+  <td>–</td>
+  <td class="num" data-v="2252.88">2.253</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.147">2,15</td>
+  <td class="num" data-v="56.18"><span class="score s-mid">56,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43875" data-geo="obala" data-cat="zemljiste" data-score="56.08"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.37827520031723" data-lng="13.622597774094451">
+  <td><a href="listing/43875.html">#43875</a></td>
+  <td>Brtonigla</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2195.00">2.195</td>
+  <td class="num" data-v="189900.00">190.000 €</td>
+  <td class="num" data-v="86.51">87</td>
+  <td>–</td>
+  <td class="num" data-v="1756.00">1.756</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.643">2,64</td>
+  <td class="num" data-v="56.08"><span class="score s-mid">56,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45566" data-geo="obala" data-cat="zemljiste" data-score="56.07"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.22786426776613" data-lng="13.599124252727199">
+  <td><a href="listing/45566.html">#45566</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2101.00">2.101</td>
+  <td class="num" data-v="273000.00">273.000 €</td>
+  <td class="num" data-v="129.94">130</td>
+  <td>–</td>
+  <td class="num" data-v="1680.80">1.681</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.760">1,76</td>
+  <td class="num" data-v="56.07"><span class="score s-mid">56,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41921" data-geo="obala" data-cat="zemljiste" data-score="56.07"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.37749784953231" data-lng="14.322155120682448">
+  <td><a href="listing/41921.html">#41921</a></td>
+  <td>Jušići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4130.00">4.130</td>
+  <td class="num" data-v="400000.00">400.000 €</td>
+  <td class="num" data-v="96.85">97</td>
+  <td>–</td>
+  <td class="num" data-v="2973.60">2.974</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.381">1,38</td>
+  <td class="num" data-v="56.07"><span class="score s-mid">56,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42146" data-geo="obala" data-cat="zemljiste" data-score="56.06"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.41820725477676" data-lng="14.288677958405723">
+  <td><a href="listing/42146.html">#42146</a></td>
+  <td>Mali Brgud, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4276.00">4.276</td>
+  <td class="num" data-v="189000.00">189.000 €</td>
+  <td class="num" data-v="44.20">44</td>
+  <td>–</td>
+  <td class="num" data-v="3078.72">3.079</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="3.027">3,03</td>
+  <td class="num" data-v="56.06"><span class="score s-mid">56,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="63825" data-geo="obala" data-cat="kuca" data-score="56.01"
+    data-flags="natura_uz_gradnju sea_row_nepoznat zone_uncertainty zona_provjeriti kuca_za_rusenje parcelacija zona_iz_oglasa duplikati llm_pending" data-lat="45.03233355800111" data-lng="13.746486092222828">
+  <td><a href="listing/63825.html">#63825</a></td>
+  <td>Bale</td>
+  <td>obala</td><td>kuca</td>
+  <td class="num" data-v="7800.00">7.800</td>
+  <td class="num" data-v="645000.00">645.000 €</td>
+  <td class="num" data-v="82.69">83</td>
+  <td>–</td>
+  <td class="num" data-v="5616.00">5.616</td>
+  <td class="num" data-v="131.73">132</td>
+  <td class="num" data-v="1.593">1,59</td>
+  <td class="num" data-v="56.01"><span class="score s-mid">56,0</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="40357" data-geo="obala" data-cat="zemljiste" data-score="56.00"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.41464741783751" data-lng="14.303347529224533">
+  <td><a href="listing/40357.html">#40357</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3600.00">3.600</td>
+  <td class="num" data-v="224100.00">224.000 €</td>
+  <td class="num" data-v="62.25">62</td>
+  <td>–</td>
+  <td class="num" data-v="2592.00">2.592</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.149">2,15</td>
+  <td class="num" data-v="56.00"><span class="score s-mid">56,0</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="53623" data-geo="obala" data-cat="kuca" data-score="55.98"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti kuca_za_rusenje rusenje_procjena llm_pending" data-lat="45.47260285270348" data-lng="14.25870020110629">
+  <td><a href="listing/53623.html">#53623</a></td>
+  <td>Šapjane, Matulji</td>
+  <td>obala</td><td>kuca</td>
+  <td class="num" data-v="2500.00">2.500</td>
+  <td class="num" data-v="210000.00">210.000 €</td>
+  <td class="num" data-v="84.00">84</td>
+  <td>–</td>
+  <td class="num" data-v="2000.00">2.000</td>
+  <td class="num" data-v="224.51">225</td>
+  <td class="num" data-v="2.673">2,67</td>
+  <td class="num" data-v="55.98"><span class="score s-mid">56,0</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="površina objekta za rušenje pretpostavljena">rusenje_procjena</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45434" data-geo="obala" data-cat="zemljiste" data-score="55.88"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.371692753606325" data-lng="13.622963331698061">
+  <td><a href="listing/45434.html">#45434</a></td>
+  <td>Brtonigla</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3618.00">3.618</td>
+  <td class="num" data-v="370000.00">370.000 €</td>
+  <td class="num" data-v="102.27">102</td>
+  <td>–</td>
+  <td class="num" data-v="2604.96">2.605</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.308">1,31</td>
+  <td class="num" data-v="55.88"><span class="score s-mid">55,9</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45688" data-geo="obala" data-cat="zemljiste" data-score="55.84"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.05781229733509" data-lng="13.813624210328523">
+  <td><a href="listing/45688.html">#45688</a></td>
+  <td>Krmed, Bale</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3090.00">3.090</td>
+  <td class="num" data-v="139000.00">139.000 €</td>
+  <td class="num" data-v="44.98">45</td>
+  <td>–</td>
+  <td class="num" data-v="2224.80">2.225</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.974">2,97</td>
+  <td class="num" data-v="55.84"><span class="score s-mid">55,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="40383" data-geo="obala" data-cat="zemljiste" data-score="55.83"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.12284" data-lng="13.838499">
+  <td><a href="listing/40383.html">#40383</a></td>
+  <td>Rovinjsko Selo, Rovinj</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1874.00">1.874</td>
+  <td class="num" data-v="232000.00">232.000 €</td>
+  <td class="num" data-v="123.80">124</td>
+  <td>–</td>
+  <td class="num" data-v="1499.20">1.499</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.847">1,85</td>
+  <td class="num" data-v="55.83"><span class="score s-mid">55,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45062" data-geo="obala" data-cat="zemljiste" data-score="55.82"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.23069664087825" data-lng="13.605893092565077">
+  <td><a href="listing/45062.html">#45062</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4450.00">4.450</td>
+  <td class="num" data-v="270000.00">270.000 €</td>
+  <td class="num" data-v="60.67">61</td>
+  <td>–</td>
+  <td class="num" data-v="3204.00">3.204</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.205">2,21</td>
+  <td class="num" data-v="55.82"><span class="score s-mid">55,8</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="40585" data-geo="obala" data-cat="zemljiste" data-score="55.72"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti duplikati llm_pending" data-lat="45.21304718775371" data-lng="13.755526892953814">
+  <td><a href="listing/40585.html">#40585</a></td>
+  <td>Baderna, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1291.00">1.291</td>
+  <td class="num" data-v="160000.00">160.000 €</td>
+  <td class="num" data-v="123.93">124</td>
+  <td>–</td>
+  <td class="num" data-v="1032.80">1.033</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.845">1,84</td>
+  <td class="num" data-v="55.72"><span class="score s-mid">55,7</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45149" data-geo="obala" data-cat="zemljiste" data-score="55.62"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.43055367430913" data-lng="13.527952701774215">
+  <td><a href="listing/45149.html">#45149</a></td>
+  <td>Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3364.00">3.364</td>
+  <td class="num" data-v="360000.00">360.000 €</td>
+  <td class="num" data-v="107.02">107</td>
+  <td>–</td>
+  <td class="num" data-v="2422.08">2.422</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.250">1,25</td>
+  <td class="num" data-v="55.62"><span class="score s-mid">55,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="407" data-geo="obala" data-cat="zemljiste" data-score="55.56"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti zona_iz_oglasa llm_pending" data-lat="45.40909076328893" data-lng="13.602530373269303">
+  <td><a href="listing/407.html">#407</a></td>
+  <td>Materada, Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2139.00">2.139</td>
+  <td class="num" data-v="125000.00">125.000 €</td>
+  <td class="num" data-v="58.44">58</td>
+  <td>–</td>
+  <td class="num" data-v="1711.20">1.711</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="3.913">3,91</td>
+  <td class="num" data-v="55.56"><span class="score s-mid">55,6</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="9344" data-geo="obala" data-cat="zemljiste" data-score="55.55"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.21320154259953" data-lng="13.755707051437396">
+  <td><a href="listing/9344.html">#9344</a></td>
+  <td>Baderna, Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2000.00">2.000</td>
+  <td class="num" data-v="250000.00">250.000 €</td>
+  <td class="num" data-v="125.00">125</td>
+  <td>–</td>
+  <td class="num" data-v="1600.00">1.600</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.829">1,83</td>
+  <td class="num" data-v="55.55"><span class="score s-mid">55,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41543" data-geo="obala" data-cat="zemljiste" data-score="55.53"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.41278594647706" data-lng="14.311556370595472">
+  <td><a href="listing/41543.html">#41543</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4057.00">4.057</td>
+  <td class="num" data-v="169000.00">169.000 €</td>
+  <td class="num" data-v="41.66">42</td>
+  <td>–</td>
+  <td class="num" data-v="2921.04">2.921</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="3.212">3,21</td>
+  <td class="num" data-v="55.53"><span class="score s-mid">55,5</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="38412" data-geo="obala" data-cat="zemljiste" data-score="55.32"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.29065116035021" data-lng="14.27625349975692">
+  <td><a href="listing/38412.html">#38412</a></td>
+  <td>Lovran</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1968.00">1.968</td>
+  <td class="num" data-v="310000.00">310.000 €</td>
+  <td class="num" data-v="157.52">158</td>
+  <td>–</td>
+  <td class="num" data-v="1574.40">1.574</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.452">1,45</td>
+  <td class="num" data-v="55.32"><span class="score s-mid">55,3</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44256" data-geo="obala" data-cat="zemljiste" data-score="55.30"
+    data-flags="natura_uz_gradnju sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.07004914602428" data-lng="13.670699223713147">
+  <td><a href="listing/44256.html">#44256</a></td>
+  <td>Rovinj</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1761.00">1.761</td>
+  <td class="num" data-v="264150.00">264.000 €</td>
+  <td class="num" data-v="150.00">150</td>
+  <td>–</td>
+  <td class="num" data-v="1408.80">1.409</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.524">1,52</td>
+  <td class="num" data-v="55.30"><span class="score s-mid">55,3</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7664" data-geo="obala" data-cat="zemljiste" data-score="55.27"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.41007908952279" data-lng="14.299005508265516">
+  <td><a href="listing/7664.html">#7664</a></td>
+  <td>Permani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="4000.00">4.000</td>
+  <td class="num" data-v="210000.00">210.000 €</td>
+  <td class="num" data-v="52.50">52</td>
+  <td>–</td>
+  <td class="num" data-v="2880.00">2.880</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.548">2,55</td>
+  <td class="num" data-v="55.27"><span class="score s-mid">55,3</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="43523" data-geo="obala" data-cat="zemljiste" data-score="55.23"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.23073604952185" data-lng="13.602647378532486">
+  <td><a href="listing/43523.html">#43523</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1090.00">1.090</td>
+  <td class="num" data-v="119900.00">120.000 €</td>
+  <td class="num" data-v="110.00">110</td>
+  <td>–</td>
+  <td class="num" data-v="872.00">872</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.079">2,08</td>
+  <td class="num" data-v="55.23"><span class="score s-mid">55,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="38787" data-geo="obala" data-cat="zemljiste" data-score="55.22"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija zona_iz_oglasa llm_pending" data-lat="45.39746962746474" data-lng="14.29903663300951">
+  <td><a href="listing/38787.html">#38787</a></td>
+  <td>Mučići, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="3100.00">3.100</td>
+  <td class="num" data-v="195000.00">195.000 €</td>
+  <td class="num" data-v="62.90">63</td>
+  <td>–</td>
+  <td class="num" data-v="2232.00">2.232</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.127">2,13</td>
+  <td class="num" data-v="55.22"><span class="score s-mid">55,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="41739" data-geo="obala" data-cat="zemljiste" data-score="55.22"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija duplikati llm_pending" data-lat="45.225380952582135" data-lng="13.596669826879534">
+  <td><a href="listing/41739.html">#41739</a></td>
+  <td>Poreč</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2802.00">2.802</td>
+  <td class="num" data-v="275000.00">275.000 €</td>
+  <td class="num" data-v="98.14">98</td>
+  <td>–</td>
+  <td class="num" data-v="2017.44">2.017</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.363">1,36</td>
+  <td class="num" data-v="55.22"><span class="score s-mid">55,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="44587" data-geo="obala" data-cat="zemljiste" data-score="55.19"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.4514572537436" data-lng="13.542719136973613">
+  <td><a href="listing/44587.html">#44587</a></td>
+  <td>Murine, Umag</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2718.00">2.718</td>
+  <td class="num" data-v="125000.00">125.000 €</td>
+  <td class="num" data-v="45.99">46</td>
+  <td>–</td>
+  <td class="num" data-v="1956.96">1.957</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="2.909">2,91</td>
+  <td class="num" data-v="55.19"><span class="score s-mid">55,2</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="38222" data-geo="obala" data-cat="zemljiste" data-score="55.15"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.392732289718865" data-lng="14.320382953684893">
+  <td><a href="listing/38222.html">#38222</a></td>
+  <td>Jurdani, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2043.00">2.043</td>
+  <td class="num" data-v="159000.00">159.000 €</td>
+  <td class="num" data-v="77.83">78</td>
+  <td>–</td>
+  <td class="num" data-v="1634.40">1.634</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="2.938">2,94</td>
+  <td class="num" data-v="55.15"><span class="score s-mid">55,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="45646" data-geo="obala" data-cat="zemljiste" data-score="55.09"
+    data-flags="natura_uz_gradnju sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.103398436251396" data-lng="13.716132880476653">
+  <td><a href="listing/45646.html">#45646</a></td>
+  <td>Rovinjsko Selo, Rovinj</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="5234.00">5.234</td>
+  <td class="num" data-v="407300.00">407.000 €</td>
+  <td class="num" data-v="77.82">78</td>
+  <td>–</td>
+  <td class="num" data-v="3768.48">3.768</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.719">1,72</td>
+  <td class="num" data-v="55.09"><span class="score s-mid">55,1</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="42262" data-geo="obala" data-cat="zemljiste" data-score="55.07"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="45.35069829254233" data-lng="14.296797025529546">
+  <td><a href="listing/42262.html">#42262</a></td>
+  <td>Bregi, Matulji</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="2757.00">2.757</td>
+  <td class="num" data-v="235000.00">235.000 €</td>
+  <td class="num" data-v="85.24">85</td>
+  <td>–</td>
+  <td class="num" data-v="1985.04">1.985</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.570">1,57</td>
+  <td class="num" data-v="55.07"><span class="score s-mid">55,1</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="39874" data-geo="obala" data-cat="zemljiste" data-score="55.05"
+    data-flags="sea_row_nepoznat zone_uncertainty zona_provjeriti llm_pending" data-lat="45.19380172819401" data-lng="14.226419822815366">
+  <td><a href="listing/39874.html">#39874</a></td>
+  <td>Martina, Mošćenička Draga</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="1017.00">1.017</td>
+  <td class="num" data-v="150000.00">150.000 €</td>
+  <td class="num" data-v="147.49">147</td>
+  <td>–</td>
+  <td class="num" data-v="813.60">814</td>
+  <td class="num" data-v="228.65">229</td>
+  <td class="num" data-v="1.550">1,55</td>
+  <td class="num" data-v="55.05"><span class="score s-mid">55,0</span></td>
+  <td><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="40740" data-geo="obala" data-cat="zemljiste" data-score="55.03"
+    data-flags="natura_uz_gradnju sea_row_nepoznat zone_uncertainty zona_provjeriti parcelacija llm_pending" data-lat="44.189322427441" data-lng="15.549249477832">
+  <td><a href="listing/40740.html">#40740</a></td>
+  <td>Novigrad</td>
+  <td>obala</td><td>zemljiste</td>
+  <td class="num" data-v="6144.00">6.144</td>
+  <td class="num" data-v="491520.00">492.000 €</td>
+  <td class="num" data-v="80.00">80</td>
+  <td>–</td>
+  <td class="num" data-v="4423.68">4.424</td>
+  <td class="num" data-v="133.79">134</td>
+  <td class="num" data-v="1.672">1,67</td>
+  <td class="num" data-v="55.03"><span class="score s-mid">55,0</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="obala: red uz more nepoznat (bez GIS-a / približan pin) — pretpostavljen 2. red (−10)">sea_row_nepoznat</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var MARKERS = [{&#34;id&#34;: 4860, &#34;lat&#34;: 45.46898302098655, &#34;lng&#34;: 14.278553887011046, &#34;score&#34;: 65.61, &#34;href&#34;: &#34;listing/4860.html&#34;, &#34;label&#34;: &#34;#4860 · Rupa · 519.000 €&#34;}, {&#34;id&#34;: 35963, &#34;lat&#34;: 45.417165107349916, &#34;lng&#34;: 14.301109948309666, &#34;score&#34;: 64.92, &#34;href&#34;: &#34;listing/35963.html&#34;, &#34;label&#34;: &#34;#35963 · Permani · 390.000 €&#34;}, {&#34;id&#34;: 41442, &#34;lat&#34;: 45.3652433, &#34;lng&#34;: 14.2981623, &#34;score&#34;: 60.8, &#34;href&#34;: &#34;listing/41442.html&#34;, &#34;label&#34;: &#34;#41442 · Rukavac · 600.000 €&#34;}, {&#34;id&#34;: 36913, &#34;lat&#34;: 45.05928220228177, &#34;lng&#34;: 13.820867646129761, &#34;score&#34;: 60.68, &#34;href&#34;: &#34;listing/36913.html&#34;, &#34;label&#34;: &#34;#36913 · Krmed · 645.000 €&#34;}, {&#34;id&#34;: 36746, &#34;lat&#34;: 45.34404634535662, &#34;lng&#34;: 14.292952048352161, &#34;score&#34;: 60.38, &#34;href&#34;: &#34;listing/36746.html&#34;, &#34;label&#34;: &#34;#36746 · Bregi · 450.000 €&#34;}, {&#34;id&#34;: 38189, &#34;lat&#34;: 45.41395786314148, &#34;lng&#34;: 14.308014357291468, &#34;score&#34;: 59.93, &#34;href&#34;: &#34;listing/38189.html&#34;, &#34;label&#34;: &#34;#38189 · Permani · 430.000 €&#34;}, {&#34;id&#34;: 43465, &#34;lat&#34;: 45.31648452363166, &#34;lng&#34;: 13.615384796099569, &#34;score&#34;: 59.23, &#34;href&#34;: &#34;listing/43465.html&#34;, &#34;label&#34;: &#34;#43465 · Tar · 342.000 €&#34;}, {&#34;id&#34;: 7056, &#34;lat&#34;: 45.378794600795956, &#34;lng&#34;: 14.329561790921652, &#34;score&#34;: 59.11, &#34;href&#34;: &#34;listing/7056.html&#34;, &#34;label&#34;: &#34;#7056 · Jušići · 309.000 €&#34;}, {&#34;id&#34;: 500, &#34;lat&#34;: 44.143711919574336, &#34;lng&#34;: 15.575362880695252, &#34;score&#34;: 59.08, &#34;href&#34;: &#34;listing/500.html&#34;, &#34;label&#34;: &#34;#500 · Pridraga · 371.000 €&#34;}, {&#34;id&#34;: 38404, &#34;lat&#34;: 45.377504480724866, &#34;lng&#34;: 14.321173339895076, &#34;score&#34;: 58.84, &#34;href&#34;: &#34;listing/38404.html&#34;, &#34;label&#34;: &#34;#38404 · Jušići · 298.000 €&#34;}, {&#34;id&#34;: 4662, &#34;lat&#34;: 45.385043311735664, &#34;lng&#34;: 14.318920658614788, &#34;score&#34;: 58.79, &#34;href&#34;: &#34;listing/4662.html&#34;, &#34;label&#34;: &#34;#4662 · Jušići · 353.000 €&#34;}, {&#34;id&#34;: 8056, &#34;lat&#34;: 45.38070996054399, &#34;lng&#34;: 14.322242645367766, &#34;score&#34;: 58.71, &#34;href&#34;: &#34;listing/8056.html&#34;, &#34;label&#34;: &#34;#8056 · Jušići · 289.000 €&#34;}, {&#34;id&#34;: 44596, &#34;lat&#34;: 45.182560617936026, &#34;lng&#34;: 13.634155993553067, &#34;score&#34;: 58.63, &#34;href&#34;: &#34;listing/44596.html&#34;, &#34;label&#34;: &#34;#44596 · Poreč · 554.000 €&#34;}, {&#34;id&#34;: 43271, &#34;lat&#34;: 45.43437045269678, &#34;lng&#34;: 13.516504581855033, &#34;score&#34;: 58.49, &#34;href&#34;: &#34;listing/43271.html&#34;, &#34;label&#34;: &#34;#43271 · Umag · 280.000 €&#34;}, {&#34;id&#34;: 45649, &#34;lat&#34;: 45.367164884043305, &#34;lng&#34;: 13.622246639552015, &#34;score&#34;: 58.4, &#34;href&#34;: &#34;listing/45649.html&#34;, &#34;label&#34;: &#34;#45649 · Brtonigla · 296.000 €&#34;}, {&#34;id&#34;: 41853, &#34;lat&#34;: 45.22799016034163, &#34;lng&#34;: 13.60277042029948, &#34;score&#34;: 58.26, &#34;href&#34;: &#34;listing/41853.html&#34;, &#34;label&#34;: &#34;#41853 · Poreč · 280.000 €&#34;}, {&#34;id&#34;: 6357, &#34;lat&#34;: 45.21111756889026, &#34;lng&#34;: 13.751919807014675, &#34;score&#34;: 57.92, &#34;href&#34;: &#34;listing/6357.html&#34;, &#34;label&#34;: &#34;#6357 · Baderna · 270.000 €&#34;}, {&#34;id&#34;: 42606, &#34;lat&#34;: 44.146897743007194, &#34;lng&#34;: 15.56908286578792, &#34;score&#34;: 57.83, &#34;href&#34;: &#34;listing/42606.html&#34;, &#34;label&#34;: &#34;#42606 · Pridraga · 256.000 €&#34;}, {&#34;id&#34;: 5773, &#34;lat&#34;: 45.262182, &#34;lng&#34;: 13.659044, &#34;score&#34;: 57.79, &#34;href&#34;: &#34;listing/5773.html&#34;, &#34;label&#34;: &#34;#5773 · Nova Vas · 278.000 €&#34;}, {&#34;id&#34;: 43594, &#34;lat&#34;: 45.32501077271491, &#34;lng&#34;: 13.564333666759007, &#34;score&#34;: 57.79, &#34;href&#34;: &#34;listing/43594.html&#34;, &#34;label&#34;: &#34;#43594 · Novigrad · 385.000 €&#34;}, {&#34;id&#34;: 45540, &#34;lat&#34;: 45.429988679738344, &#34;lng&#34;: 13.529044104889115, &#34;score&#34;: 57.78, &#34;href&#34;: &#34;listing/45540.html&#34;, &#34;label&#34;: &#34;#45540 · Umag · 611.000 €&#34;}, {&#34;id&#34;: 37161, &#34;lat&#34;: 45.428561364521165, &#34;lng&#34;: 13.530216654847097, &#34;score&#34;: 57.71, &#34;href&#34;: &#34;listing/37161.html&#34;, &#34;label&#34;: &#34;#37161 · Umag · 176.000 €&#34;}, {&#34;id&#34;: 44231, &#34;lat&#34;: 45.376764846851785, &#34;lng&#34;: 13.623382488185483, &#34;score&#34;: 57.54, &#34;href&#34;: &#34;listing/44231.html&#34;, &#34;label&#34;: &#34;#44231 · Brtonigla · 307.000 €&#34;}, {&#34;id&#34;: 392, &#34;lat&#34;: 45.21408749995022, &#34;lng&#34;: 13.748534386111926, &#34;score&#34;: 57.43, &#34;href&#34;: &#34;listing/392.html&#34;, &#34;label&#34;: &#34;#392 · Baderna · 240.000 €&#34;}, {&#34;id&#34;: 42018, &#34;lat&#34;: 45.175864536037224, &#34;lng&#34;: 14.223939861387269, &#34;score&#34;: 57.35, &#34;href&#34;: &#34;listing/42018.html&#34;, &#34;label&#34;: &#34;#42018 · Brseč · 325.000 €&#34;}, {&#34;id&#34;: 42029, &#34;lat&#34;: 45.41499660310104, &#34;lng&#34;: 14.305869637454089, &#34;score&#34;: 57.23, &#34;href&#34;: &#34;listing/42029.html&#34;, &#34;label&#34;: &#34;#42029 · Permani · 249.000 €&#34;}, {&#34;id&#34;: 445, &#34;lat&#34;: 45.3638000140824, &#34;lng&#34;: 14.329789929437162, &#34;score&#34;: 57.21, &#34;href&#34;: &#34;listing/445.html&#34;, &#34;label&#34;: &#34;#445 · Matulji · 260.000 €&#34;}, {&#34;id&#34;: 8331, &#34;lat&#34;: 45.42977709777427, &#34;lng&#34;: 13.53444405990827, &#34;score&#34;: 57.15, &#34;href&#34;: &#34;listing/8331.html&#34;, &#34;label&#34;: &#34;#8331 · Umag · 230.000 €&#34;}, {&#34;id&#34;: 36403, &#34;lat&#34;: 45.36978074191678, &#34;lng&#34;: 14.326130970719053, &#34;score&#34;: 56.96, &#34;href&#34;: &#34;listing/36403.html&#34;, &#34;label&#34;: &#34;#36403 · Matulji · 227.000 €&#34;}, {&#34;id&#34;: 6682, &#34;lat&#34;: 45.379366633149246, &#34;lng&#34;: 14.322281541310929, &#34;score&#34;: 56.84, &#34;href&#34;: &#34;listing/6682.html&#34;, &#34;label&#34;: &#34;#6682 · Jušići · 245.000 €&#34;}, {&#34;id&#34;: 42337, &#34;lat&#34;: 45.23161385954434, &#34;lng&#34;: 13.593220240268215, &#34;score&#34;: 56.72, &#34;href&#34;: &#34;listing/42337.html&#34;, &#34;label&#34;: &#34;#42337 · Poreč · 234.000 €&#34;}, {&#34;id&#34;: 41894, &#34;lat&#34;: 45.162208900436035, &#34;lng&#34;: 14.217310114876271, &#34;score&#34;: 56.63, &#34;href&#34;: &#34;listing/41894.html&#34;, &#34;label&#34;: &#34;#41894 · Zagore · 250.000 €&#34;}, {&#34;id&#34;: 44499, &#34;lat&#34;: 45.226725, &#34;lng&#34;: 13.602844, &#34;score&#34;: 56.58, &#34;href&#34;: &#34;listing/44499.html&#34;, &#34;label&#34;: &#34;#44499 · Poreč · 185.000 €&#34;}, {&#34;id&#34;: 44250, &#34;lat&#34;: 45.22679989538634, &#34;lng&#34;: 13.601332346877552, &#34;score&#34;: 56.54, &#34;href&#34;: &#34;listing/44250.html&#34;, &#34;label&#34;: &#34;#44250 · Poreč · 370.000 €&#34;}, {&#34;id&#34;: 41657, &#34;lat&#34;: 45.36751269001439, &#34;lng&#34;: 14.32515683757432, &#34;score&#34;: 56.51, &#34;href&#34;: &#34;listing/41657.html&#34;, &#34;label&#34;: &#34;#41657 · Matulji · 177.000 €&#34;}, {&#34;id&#34;: 45255, &#34;lat&#34;: 45.215143907379, &#34;lng&#34;: 13.661856486892, &#34;score&#34;: 56.48, &#34;href&#34;: &#34;listing/45255.html&#34;, &#34;label&#34;: &#34;#45255 · Buići · 205.000 €&#34;}, {&#34;id&#34;: 42122, &#34;lat&#34;: 45.454092855677764, &#34;lng&#34;: 14.304040143378705, &#34;score&#34;: 56.35, &#34;href&#34;: &#34;listing/42122.html&#34;, &#34;label&#34;: &#34;#42122 · Lipa · 200.000 €&#34;}, {&#34;id&#34;: 43364, &#34;lat&#34;: 45.20313208709806, &#34;lng&#34;: 13.680883914791723, &#34;score&#34;: 56.35, &#34;href&#34;: &#34;listing/43364.html&#34;, &#34;label&#34;: &#34;#43364 · Radmani · 170.000 €&#34;}, {&#34;id&#34;: 43884, &#34;lat&#34;: 45.21464869995525, &#34;lng&#34;: 13.74896935273765, &#34;score&#34;: 56.34, &#34;href&#34;: &#34;listing/43884.html&#34;, &#34;label&#34;: &#34;#43884 · Baderna · 205.000 €&#34;}, {&#34;id&#34;: 42285, &#34;lat&#34;: 45.36036923141142, &#34;lng&#34;: 14.316031444982835, &#34;score&#34;: 56.22, &#34;href&#34;: &#34;listing/42285.html&#34;, &#34;label&#34;: &#34;#42285 · Mihotići · 250.000 €&#34;}, {&#34;id&#34;: 42042, &#34;lat&#34;: 45.41514058026073, &#34;lng&#34;: 14.30456251499663, &#34;score&#34;: 56.18, &#34;href&#34;: &#34;listing/42042.html&#34;, &#34;label&#34;: &#34;#42042 · Permani · 195.000 €&#34;}, {&#34;id&#34;: 43875, &#34;lat&#34;: 45.37827520031723, &#34;lng&#34;: 13.622597774094451, &#34;score&#34;: 56.08, &#34;href&#34;: &#34;listing/43875.html&#34;, &#34;label&#34;: &#34;#43875 · Brtonigla · 190.000 €&#34;}, {&#34;id&#34;: 45566, &#34;lat&#34;: 45.22786426776613, &#34;lng&#34;: 13.599124252727199, &#34;score&#34;: 56.07, &#34;href&#34;: &#34;listing/45566.html&#34;, &#34;label&#34;: &#34;#45566 · Poreč · 273.000 €&#34;}, {&#34;id&#34;: 41921, &#34;lat&#34;: 45.37749784953231, &#34;lng&#34;: 14.322155120682448, &#34;score&#34;: 56.07, &#34;href&#34;: &#34;listing/41921.html&#34;, &#34;label&#34;: &#34;#41921 · Jušići · 400.000 €&#34;}, {&#34;id&#34;: 42146, &#34;lat&#34;: 45.41820725477676, &#34;lng&#34;: 14.288677958405723, &#34;score&#34;: 56.06, &#34;href&#34;: &#34;listing/42146.html&#34;, &#34;label&#34;: &#34;#42146 · Mali Brgud · 189.000 €&#34;}, {&#34;id&#34;: 63825, &#34;lat&#34;: 45.03233355800111, &#34;lng&#34;: 13.746486092222828, &#34;score&#34;: 56.01, &#34;href&#34;: &#34;listing/63825.html&#34;, &#34;label&#34;: &#34;#63825 · Bale · 645.000 €&#34;}, {&#34;id&#34;: 40357, &#34;lat&#34;: 45.41464741783751, &#34;lng&#34;: 14.303347529224533, &#34;score&#34;: 56.0, &#34;href&#34;: &#34;listing/40357.html&#34;, &#34;label&#34;: &#34;#40357 · Permani · 224.000 €&#34;}, {&#34;id&#34;: 53623, &#34;lat&#34;: 45.47260285270348, &#34;lng&#34;: 14.25870020110629, &#34;score&#34;: 55.98, &#34;href&#34;: &#34;listing/53623.html&#34;, &#34;label&#34;: &#34;#53623 · Šapjane · 210.000 €&#34;}, {&#34;id&#34;: 45434, &#34;lat&#34;: 45.371692753606325, &#34;lng&#34;: 13.622963331698061, &#34;score&#34;: 55.88, &#34;href&#34;: &#34;listing/45434.html&#34;, &#34;label&#34;: &#34;#45434 · Brtonigla · 370.000 €&#34;}, {&#34;id&#34;: 45688, &#34;lat&#34;: 45.05781229733509, &#34;lng&#34;: 13.813624210328523, &#34;score&#34;: 55.84, &#34;href&#34;: &#34;listing/45688.html&#34;, &#34;label&#34;: &#34;#45688 · Krmed · 139.000 €&#34;}, {&#34;id&#34;: 40383, &#34;lat&#34;: 45.12284, &#34;lng&#34;: 13.838499, &#34;score&#34;: 55.83, &#34;href&#34;: &#34;listing/40383.html&#34;, &#34;label&#34;: &#34;#40383 · Rovinjsko Selo · 232.000 €&#34;}, {&#34;id&#34;: 45062, &#34;lat&#34;: 45.23069664087825, &#34;lng&#34;: 13.605893092565077, &#34;score&#34;: 55.82, &#34;href&#34;: &#34;listing/45062.html&#34;, &#34;label&#34;: &#34;#45062 · Poreč · 270.000 €&#34;}, {&#34;id&#34;: 40585, &#34;lat&#34;: 45.21304718775371, &#34;lng&#34;: 13.755526892953814, &#34;score&#34;: 55.72, &#34;href&#34;: &#34;listing/40585.html&#34;, &#34;label&#34;: &#34;#40585 · Baderna · 160.000 €&#34;}, {&#34;id&#34;: 45149, &#34;lat&#34;: 45.43055367430913, &#34;lng&#34;: 13.527952701774215, &#34;score&#34;: 55.62, &#34;href&#34;: &#34;listing/45149.html&#34;, &#34;label&#34;: &#34;#45149 · Umag · 360.000 €&#34;}, {&#34;id&#34;: 407, &#34;lat&#34;: 45.40909076328893, &#34;lng&#34;: 13.602530373269303, &#34;score&#34;: 55.56, &#34;href&#34;: &#34;listing/407.html&#34;, &#34;label&#34;: &#34;#407 · Materada · 125.000 €&#34;}, {&#34;id&#34;: 9344, &#34;lat&#34;: 45.21320154259953, &#34;lng&#34;: 13.755707051437396, &#34;score&#34;: 55.55, &#34;href&#34;: &#34;listing/9344.html&#34;, &#34;label&#34;: &#34;#9344 · Baderna · 250.000 €&#34;}, {&#34;id&#34;: 41543, &#34;lat&#34;: 45.41278594647706, &#34;lng&#34;: 14.311556370595472, &#34;score&#34;: 55.53, &#34;href&#34;: &#34;listing/41543.html&#34;, &#34;label&#34;: &#34;#41543 · Permani · 169.000 €&#34;}, {&#34;id&#34;: 38412, &#34;lat&#34;: 45.29065116035021, &#34;lng&#34;: 14.27625349975692, &#34;score&#34;: 55.32, &#34;href&#34;: &#34;listing/38412.html&#34;, &#34;label&#34;: &#34;#38412 · Lovran · 310.000 €&#34;}, {&#34;id&#34;: 44256, &#34;lat&#34;: 45.07004914602428, &#34;lng&#34;: 13.670699223713147, &#34;score&#34;: 55.3, &#34;href&#34;: &#34;listing/44256.html&#34;, &#34;label&#34;: &#34;#44256 · Rovinj · 264.000 €&#34;}, {&#34;id&#34;: 7664, &#34;lat&#34;: 45.41007908952279, &#34;lng&#34;: 14.299005508265516, &#34;score&#34;: 55.27, &#34;href&#34;: &#34;listing/7664.html&#34;, &#34;label&#34;: &#34;#7664 · Permani · 210.000 €&#34;}, {&#34;id&#34;: 43523, &#34;lat&#34;: 45.23073604952185, &#34;lng&#34;: 13.602647378532486, &#34;score&#34;: 55.23, &#34;href&#34;: &#34;listing/43523.html&#34;, &#34;label&#34;: &#34;#43523 · Poreč · 120.000 €&#34;}, {&#34;id&#34;: 38787, &#34;lat&#34;: 45.39746962746474, &#34;lng&#34;: 14.29903663300951, &#34;score&#34;: 55.22, &#34;href&#34;: &#34;listing/38787.html&#34;, &#34;label&#34;: &#34;#38787 · Mučići · 195.000 €&#34;}, {&#34;id&#34;: 41739, &#34;lat&#34;: 45.225380952582135, &#34;lng&#34;: 13.596669826879534, &#34;score&#34;: 55.22, &#34;href&#34;: &#34;listing/41739.html&#34;, &#34;label&#34;: &#34;#41739 · Poreč · 275.000 €&#34;}, {&#34;id&#34;: 44587, &#34;lat&#34;: 45.4514572537436, &#34;lng&#34;: 13.542719136973613, &#34;score&#34;: 55.19, &#34;href&#34;: &#34;listing/44587.html&#34;, &#34;label&#34;: &#34;#44587 · Murine · 125.000 €&#34;}, {&#34;id&#34;: 38222, &#34;lat&#34;: 45.392732289718865, &#34;lng&#34;: 14.320382953684893, &#34;score&#34;: 55.15, &#34;href&#34;: &#34;listing/38222.html&#34;, &#34;label&#34;: &#34;#38222 · Jurdani · 159.000 €&#34;}, {&#34;id&#34;: 45646, &#34;lat&#34;: 45.103398436251396, &#34;lng&#34;: 13.716132880476653, &#34;score&#34;: 55.09, &#34;href&#34;: &#34;listing/45646.html&#34;, &#34;label&#34;: &#34;#45646 · Rovinjsko Selo · 407.000 €&#34;}, {&#34;id&#34;: 42262, &#34;lat&#34;: 45.35069829254233, &#34;lng&#34;: 14.296797025529546, &#34;score&#34;: 55.07, &#34;href&#34;: &#34;listing/42262.html&#34;, &#34;label&#34;: &#34;#42262 · Bregi · 235.000 €&#34;}, {&#34;id&#34;: 39874, &#34;lat&#34;: 45.19380172819401, &#34;lng&#34;: 14.226419822815366, &#34;score&#34;: 55.05, &#34;href&#34;: &#34;listing/39874.html&#34;, &#34;label&#34;: &#34;#39874 · Martina · 150.000 €&#34;}, {&#34;id&#34;: 40740, &#34;lat&#34;: 44.189322427441, &#34;lng&#34;: 15.549249477832, &#34;score&#34;: 55.03, &#34;href&#34;: &#34;listing/40740.html&#34;, &#34;label&#34;: &#34;#40740 · Novigrad · 492.000 €&#34;}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var layer = L.layerGroup().addTo(map);
+function color(s){ return s >= 70 ? '#0b6e4f' : (s >= 55 ? '#b3540f' : '#888'); }
+function drawMarkers(ids){
+  layer.clearLayers(); var pts = [];
+  MARKERS.forEach(function(m){ if (ids && !ids.has(m.id)) return; if (!m.lat || !m.lng) return;
+    L.circleMarker([m.lat, m.lng], {radius: 7, color: color(m.score||0), fillOpacity: .8}).bindPopup('<a href="'+m.href+'">'+m.label+'</a> · score '+(m.score||'–')).addTo(layer); pts.push([m.lat, m.lng]); });
+  if (pts.length) map.fitBounds(pts, {padding:[20,20]}); else map.setView([45.1, 15.2], 7);
+}
+function applyFilters(){
+  var geo = document.getElementById('f-geo').value, cat = document.getElementById('f-cat').value,
+      sc = parseFloat(document.getElementById('f-score').value||0), fl = document.getElementById('f-flag').value,
+      nf = document.getElementById('f-noflag').value, n = 0, ids = new Set();
+  document.querySelectorAll('#tbl tbody tr').forEach(function(tr){
+    var flags = tr.dataset.flags.split(' ');
+    var ok = (!geo || tr.dataset.geo === geo) && (!cat || tr.dataset.cat === cat) && parseFloat(tr.dataset.score) >= sc
+          && (!fl || flags.indexOf(fl) >= 0) && (!nf || flags.indexOf(nf) < 0);
+    tr.style.display = ok ? '' : 'none'; if (ok) { n++; ids.add(parseInt(tr.dataset.id)); }
+  });
+  document.getElementById('f-count').textContent = n + ' prikazano'; drawMarkers(ids);
+}
+['f-geo','f-cat','f-score','f-flag','f-noflag'].forEach(function(id){ document.getElementById(id).addEventListener('input', applyFilters); });
+document.querySelectorAll('#tbl th').forEach(function(th, i){ th.addEventListener('click', function(){
+  var tb = th.closest('table').querySelector('tbody'), rows = Array.from(tb.querySelectorAll('tr'));
+  var asc = th.dataset.asc !== '1'; th.dataset.asc = asc ? '1' : '0';
+  rows.sort(function(a,b){ var ca=a.children[i], cb=b.children[i]; var va = ca.dataset.v !== undefined ? parseFloat(ca.dataset.v) : ca.textContent.trim().toLowerCase();
+    var vb = cb.dataset.v !== undefined ? parseFloat(cb.dataset.v) : cb.textContent.trim().toLowerCase(); return (va > vb ? 1 : va < vb ? -1 : 0) * (asc ? 1 : -1); });
+  rows.forEach(function(r){ tb.appendChild(r); }); }); });
+applyFilters();
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:53</span>
+</header>
+<main>
+<h1>#40995 · PRILIKA – Građevinsko Zemljište Novigrad – Pridraga 2500 m2</h1>
+<div class="sub">Novigrad, Novigrad, Zadarska · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/gradevinsko-zemljiste-novigrad-pridraga-2500-m2-50000-oglas-34126148" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">59</span>
+        <span class="muted">rule 59 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>1,69 M€ (828 €/m²) · ratio <b>13,54</b></dd>
+      <dt>Ukupna investicija</dt><dd>4,16 M€</dd>
+      <dt>GBP</dt><dd>1.635 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+<p><b>Sažetak:</b> Prodaje se građevinska parcela od 2.500 m² u zaseoku Viduke kod Pridrage (općina Novigrad), manje od 1.200 m od mora, s pristupnim putem uz dvije strane parcele i komunalnom infrastrukturom uz parcelu bez pojedinačno navedenih priključaka. Moguća je parcelacija na manje dijelove, a vlasništvo je navedeno kao uredno.</p>  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>125.000 € (50 €/m²)</dd>
+      <dt>Površina</dt><dd>2.500 m² · DKP 2.044 m² (odstupanje -18,2 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · Nelmar Nekretnine</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">125.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span> Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)<br><span class="flag soft" title="ZOP pojas 70/100 m (−10)">zop_70_100</span> ZOP pojas 70/100 m (−10)<br><span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 1635.3120000000001, &#39;kis&#39;: 0.8, &#39;nkp&#39;: 1226.4840000000002, &#39;noi&#39;: None, &#39;rlv&#39;: 1692014.666086957, &#39;ratio&#39;: 13.536117328695656, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;obala_visestambeno&#39;, &#39;gdv_neto&#39;: 6868310.400000001, &#39;cost_soft&#39;: 163531.20000000004, &#39;gdv_bruto&#39;: 8585388.000000002, &#39;kis_known&#39;: False, &#39;total_inv&#39;: 4155367.5200000005, &#39;cost_build&#39;: 3270624.0000000005, &#39;cost_other&#39;: 588712.3200000001, &#39;cost_sales&#39;: 257561.64000000004, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 827.7391304347829, &#39;parcel_area&#39;: 2044.14, &#39;parcelation&#39;: False, &#39;roi_on_cost&#39;: 0.5908938807896348, &#39;profit_at_ask&#39;: 2455381.2400000007, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 4155367.5200000005, &#39;parcel_area_effective&#39;: 2044.14, &#39;sale_price_per_m2_nkp&#39;: 7000.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 5.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;none&#39;}, &#39;points&#39;: 0.0}, &#39;location&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;rlv.yaml:istra_zapad/row1&#39;, &#39;sale_price_per_m2_nkp&#39;: 7000.0}, &#39;points&#39;: 15.0}, &#39;physical&#39;: {&#39;max&#39;: 4.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 14.42, &#39;slope_points&#39;: 1.558, &#39;sea_row1_bonus&#39;: True}, &#39;points&#39;: 2.56}, &#39;liquidity&#39;: {&#39;max&#39;: 3.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.008333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 0.5, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 0.51}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 25.0, &#39;detail&#39;: {&#39;rlv&#39;: 1692015, &#39;ratio&#39;: 13.536, &#39;asking_price&#39;: 125000.0}, &#39;points&#39;: 25.0}, &#39;ticket_fit&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;asking_price&#39;: 125000.0}, &#39;points&#39;: 3.67}, &#39;zone_quality&#39;: {&#39;max&#39;: 8.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;zona nepoznata&#39;, &#39;source&#39;: &#39;nepoznato&#39;, &#39;zone_class&#39;: None}, &#39;points&#39;: 2.0}, &#39;profit_potential&#39;: {&#39;max&#39;: 20.0, &#39;detail&#39;: {&#39;roi_on_cost&#39;: 0.591, &#39;profit_at_ask&#39;: 2455381}, &#39;points&#39;: 20.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Novigrad&#39;, &#39;deviation&#39;: 0.584, &#39;ask_eur_m2&#39;: 50, &#39;benchmark_eur_m2&#39;: 120.08}, &#39;points&#39;: 10.0}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zop_70_100&#39;: 10, &#39;zone_uncertainty&#39;: 5, &#39;natura_uz_gradnju&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">78,7</td></tr><tr><td>rlv_notes</td><td class="num">[]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;natura&#39;: True, &#39;max_gbp&#39;: 1635, &#39;zop_band&#39;: &#39;70&#39;, &#39;total_inv&#39;: 4155368, &#39;zone_code&#39;: None, &#39;zone_class&#39;: None, &#39;zone_known&#39;: False, &#39;zone_source&#39;: &#39;nepoznato&#39;, &#39;zone_reviewed&#39;: None, &#39;protected_area&#39;: False}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 334804, k.č. 5438 (pin_buffer, 0,71); k.o. 334804, k.č. 4807 (pin_buffer, 0,64); k.o. 334804, k.č. 5441 (pin_buffer, 0,50)</dd>
+      <dt>Zona</dt><dd>– (–)</dd>
+      <dt>kig / kis / katnost</dt><dd>– / – / –</dd>
+      <dt>GP / UPU</dt><dd>– · UPU –</dd>
+      <dt>Pristup / nagib</dt><dd>unknown · 14,4 % (max 58,3 %)</dd>
+      <dt>More</dt><dd>0 m · red 1 · ZOP 70</dd>
+      <dt>Zaštite</dt><dd>Natura da · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>0 %</dd>
+      <dt>Match</dt><dd>0,71</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/40995.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 1635.3120000000001, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 0.8, &#39;source&#39;: &#39;default_profila&#39;}</td></tr><tr><td>sea_row</td><td class="num">{&#39;value&#39;: &#39;1&#39;, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.05, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.75, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 588712.3200000001, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 2044.14, &#39;source&#39;: &#39;dkp&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 125000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 2000.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 7000.0, &#39;source&#39;: &#39;rlv.yaml:istra_zapad/row1&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table><tr><td>permit</td><td>none</td></tr><tr><td>access_road</td><td>yes</td></tr><tr><td>sea_row_claim</td><td>none</td></tr><tr><td>building_on_parcel</td><td>none</td></tr><tr><td>sea_distance_m_claim</td><td>1200.0</td></tr></table></div>
+<h2>Benchmarks mikrolokacije</h2><table><tr><th>Vrsta</th><th class="num">Vrijednost</th><th class="num">n</th><th>Od</th><th>Izvor</th></tr>
+<tr><td>land_ask_eur_m2</td><td class="num">120</td><td class="num">156</td><td>11.09.2026.</td><td>auto</td></tr></table><h2>Opis oglasa</h2><pre>Prodaje se povoljno odlična građevinska parcela ukupne površine 2500 m2 u mjestu Pridraga u opčini Novigrad. 
+Zemljište ukupne korisne površine 2.500 m2 nalazi se na nepunih 1200 m od mora u zaseoku Viduke. 
+Teren je pravilnog pravokutnog oblika omeđen suhozidom uz koji prolazi pristupni put sa dvije strane. 
+Kompletna komunalna infrastruktura se nalazi uz samu parcelu. 
+Teren se prodaje zasebno u cjelini, a moguća je i parcelacija na manje dijelove. 
+Cijena iznosi 125.000 eura za cijelo. 
+Vlasništvo uredno. 
+Za sve dodatne informacije kao i za eventualni obilazak terena stojimo na raspolaganju. 
+O mjestu 
+Pridraga je malo slikovito dalmatinsko mjesto u blizini Novigrada, 35 km sjevero od Zadra.Ovdje ćete imati priliku provesti ugodan i miran odmor u tišini, daleko od masovnog turizma, okruženi kristalno bistrim morem, toplom mediteranskom klimom i vegetacijom, šljunčanim plažama i izuzetno gostoljubivim ljudima. 
+--------------- 
+DE 
+In der Stadt Pridraga in der Gemeinde Novigrad steht ein hervorragendes Baugrundstück mit einer Gesamtfläche von 2.500 m2 zum Verkauf. 
+Das Grundstück mit einer Gesamtnutzfläche von 2.500 m2 liegt weniger als 1.200 m vom Meer entfernt im Weiler Viduke. 
+Das Gelände hat eine regelmäßige rechteckige Form und wird von einer Trockenmauer begrenzt, entlang der auf zwei Seiten eine Zufahrtsstraße verläuft. 
+Die komplette kommunale Infrastruktur befindet sich direkt neben dem Grundstück. 
+Das Land wird separat als Ganzes verkauft, und es ist auch möglich, es in kleinere Teile zu teilen. 
+Der Preis beträgt 125.000 Euro für das Ganze. 
+Besitz in Ordnung. 
+Für weitere Informationen sowie für eine mögliche Feldbesichtigung stehen wir Ihnen gerne zur Verfügung. 
+Über den Ort 
+Pridraga ist eine kleine malerische dalmatinische Stadt in der Nähe von Novigrad, 35 km nördlich von Zadar.Hier haben Sie die Möglichkeit, einen angenehmen und ruhigen Urlaub in Stille zu verbringen, weit weg vom Massentourismus, umgeben von kristallklarem Meer, warmem mediterranem Klima und Vegetation, Kies Strände und äußerst gastfreundliche Menschen. . 
+-------------------- 
+ENG 
+An excellent building plot with a total area of 2,500 m2 is for sale in the town of Pridraga in the municipality of Novigrad. 
+The land with a total usable area of 2,500 m2 is located less than 1,200 m from the sea in the hamlet of Viduke. 
+The terrain has a regular rectangular shape and is bounded by a dry wall, along which an access road runs on two sides. 
+The complete communal infrastructure is located next to the plot itself. 
+The land is sold separately as a whole, and it is also possible to divide it into smaller parts. 
+The price is 125,000 euros for the whole. 
+Ownership in order. 
+We are at your disposal for any additional information, as well as for a possible field tour. 
+About the place 
+Pridraga is a small picturesque Dalmatian town near Novigrad, 35 km north of Zadar. Here you will have the opportunity to spend a pleasant and peaceful vacation in silence, far from mass tourism, surrounded by crystal clear sea, warm Mediterranean climate and vegetation, pebble beaches and extremely hospitable people. .</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 44.18166965248659, LNG = 15.546506764840565;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.543539176, 44.183205756], [15.543710735, 44.18315445], [15.543774691, 44.183120873], [15.54383281, 44.183069247], [15.54385721, 44.18305316], [15.543890595, 44.182991877], [15.543896059, 44.18294791], [15.543922623, 44.182929411], [15.543957585, 44.182824758], [15.543948563, 44.18277158], [15.543986458, 44.182578297], [15.544015907, 44.182481968], [15.544031229, 44.182377421], [15.544217427, 44.1822095], [15.544229876, 44.182182152], [15.544307334, 44.182117907], [15.544368148, 44.182077464], [15.544486938, 44.18193994], [15.54462236, 44.181794815], [15.544852672, 44.181636622], [15.545041203, 44.181502021], [15.545151302, 44.181437868], [15.545235841, 44.181407523], [15.545471899, 44.181241817], [15.545722391, 44.181111692], [15.545938172, 44.18103213], [15.546076583, 44.180996024], [15.546110963, 44.18097372], [15.546161838, 44.180967755], [15.546225859, 44.180945428], [15.546311881, 44.180923825], [15.546381933, 44.180915319], [15.546511645, 44.18088346], [15.546575024, 44.180869948], [15.546707176, 44.180810838], [15.546779298, 44.180821341], [15.546903832, 44.180808069], [15.546946749, 44.180775935], [15.54691431, 44.180732192], [15.546951081, 44.180716658], [15.547011022, 44.180675846], [15.547063935, 44.180652076], [15.547126797, 44.180600758], [15.547188724, 44.180576343], [15.547242644, 44.180544391], [15.547436392, 44.180450332], [15.547551562, 44.180404939], [15.547609167, 44.180377158], [15.547684942, 44.180331617], [15.547773874, 44.180268995], [15.547849907, 44.180238487], [15.548051582, 44.180156914], [15.548143797, 44.18012339], [15.548327069, 44.180035092], [15.548374784, 44.180000028], [15.548468943, 44.179938979], [15.548569024, 44.17988293], [15.548793343, 44.179769682], [15.548825739, 44.17975393], [15.548830875, 44.179761174], [15.548845409, 44.179782896], [15.548938297, 44.179754148], [15.549016089, 44.179715283], [15.549042165, 44.179695879], [15.54907461, 44.179653757], [15.549169833, 44.179604237], [15.549230236, 44.179588989], [15.549288263, 44.17956589], [15.54929848, 44.179552745], [15.549321673, 44.179549338], [15.549296719, 44.179584502], [15.549179399, 44.179623757], [15.54909498, 44.179662567], [15.549060915, 44.179688745], [15.549064916, 44.179696609], [15.549150645, 44.179693092], [15.549202472, 44.179721155], [15.54928954, 44.17973547], [15.549389295, 44.17973081], [15.549526344, 44.179693518], [15.549570548, 44.179705677], [15.549621087, 44.179790612], [15.549675432, 44.179778823], [15.5497289, 44.179767027], [15.549895053, 44.179716477], [15.549951755, 44.179705878], [15.550008965, 44.179694743], [15.550103774, 44.1796787], [15.550249545, 44.179659031], [15.550353187, 44.179653683], [15.550402158, 44.17964941], [15.550542708, 44.179643287], [15.550697723, 44.179639895], [15.550800488, 44.17964246], [15.550851704, 44.179646305], [15.550908778, 44.17965146], [15.551003942, 44.179660081], [15.551055693, 44.179669601], [15.55110215, 44.179673857], [15.551206808, 44.179698758], [15.551422235, 44.17974969], [15.551488505, 44.179766351], [15.551522943, 44.179771407], [15.551559482, 44.179785841], [15.551628821, 44.179806038], [15.551745652, 44.179828429], [15.551829199, 44.179851804], [15.551858703, 44.179860329], [15.55189492, 44.179879261], [15.552364616, 44.180031576], [15.552386652, 44.180037879], [15.552383038, 44.18004487], [15.55237659, 44.180057057], [15.552229019, 44.18000948], [15.551979577, 44.179927036], [15.551755495, 44.179861993], [15.551605591, 44.179811785], [15.551347117, 44.179746726], [15.551167552, 44.179713373], [15.550978715, 44.179688943], [15.550802233, 44.179673976], [15.55057401, 44.179664519], [15.550373422, 44.179670952], [15.550183534, 44.179688634], [15.55001614, 44.179715234], [15.54989578, 44.179741324], [15.549604537, 44.179808745], [15.549600805, 44.179799714], [15.549550475, 44.17970956], [15.549491959, 44.179724104], [15.549434338, 44.179737485], [15.549286123, 44.179761363], [15.549267747, 44.17976076], [15.549225889, 44.179758252], [15.549193439, 44.17973071], [15.549132162, 44.179706979], [15.549093181, 44.179704404], [15.549032947, 44.179724694], [15.548924915, 44.179785268], [15.548887007, 44.179793773], [15.548829646, 44.179806526], [15.548720117, 44.179851246], [15.548666429, 44.179853319], [15.548569801, 44.179904627], [15.548464408, 44.179972063], [15.548392913, 44.18000819], [15.54835071, 44.18004267], [15.548267355, 44.180085178], [15.548110128, 44.180156052], [15.54786982, 44.180244594], [15.54779151, 44.180276703], [15.547694336, 44.180346276], [15.547626205, 44.18038315], [15.547564618, 44.180417469], [15.547446816, 44.180463199], [15.547422989, 44.180474881], [15.547400536, 44.180486754], [15.547370476, 44.180497214], [15.547342358, 44.180511291], [15.54730036, 44.180532992], [15.547252864, 44.180554377], [15.54722063, 44.180583359], [15.547161638, 44.180611849], [15.547106182, 44.180638208], [15.547091687, 44.180652938], [15.547012893, 44.180699443], [15.546945655, 44.180735154], [15.546988116, 44.180785641], [15.546950598, 44.180808729], [15.546906915, 44.180834106], [15.546782238, 44.180840716], [15.546697213, 44.180847027], [15.546694009, 44.180867341], [15.546663061, 44.180878514], [15.546625564, 44.180884771], [15.546515512, 44.180915174], [15.546469128, 44.180921807], [15.546424115, 44.180928812], [15.546370358, 44.180935114], [15.546326651, 44.180946359], [15.546248054, 44.180957404], [15.546222723, 44.180969253], [15.546193004, 44.180981786], [15.546164209, 44.180991356], [15.546103546, 44.18099931], [15.546082611, 44.181010025], [15.546056797, 44.18102088], [15.546009756, 44.181037228], [15.545968193, 44.181047412], [15.545877538, 44.181077076], [15.545792148, 44.181105975], [15.545751396, 44.181120215], [15.545732274, 44.181127076], [15.545695058, 44.181146926], [15.5456276, 44.181180654], [15.545563984, 44.181216575], [15.545536877, 44.181230029], [15.545510864, 44.181245382], [15.545493781, 44.18125766], [15.545466719, 44.181276065], [15.545442072, 44.18129206], [15.545360482, 44.181348981], [15.545295356, 44.181393169], [15.545253747, 44.181421713], [15.545213732, 44.18143668], [15.545156351, 44.181458251], [15.545057855, 44.181516471], [15.544869864, 44.181648556], [15.544639892, 44.181808912], [15.54450892, 44.181949574], [15.544380805, 44.18209143], [15.544323399, 44.182129922], [15.544234119, 44.18221369], [15.54405139, 44.18238371], [15.544044559, 44.182481308], [15.544010557, 44.182573098], [15.544019562, 44.182642747], [15.543971702, 44.182771594], [15.543981135, 44.182830266], [15.543942921, 44.182934981], [15.543918264, 44.182951516], [15.543913773, 44.182997201], [15.543876075, 44.183062229], [15.543848933, 44.183077752], [15.543789654, 44.18314692], [15.543737215, 44.183164392], [15.543558375, 44.183225088], [15.543539176, 44.183205756]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.544727716, 44.181249906], [15.54514591, 44.18101255], [15.545342407, 44.181128228], [15.545471899, 44.181241817], [15.545235841, 44.181407523], [15.545151302, 44.181437868], [15.545041203, 44.181502021], [15.544727716, 44.181249906]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.548968022, 44.181398244], [15.548943532, 44.18140452], [15.548924693, 44.181409404], [15.548906953, 44.181415916], [15.548886071, 44.181423393], [15.548867831, 44.181429901], [15.548849056, 44.181438565], [15.548733924, 44.181489269], [15.54869643, 44.181503088], [15.548657285, 44.181518513], [15.548544783, 44.181561228], [15.548474481, 44.181585214], [15.54837698, 44.181620674], [15.5483605, 44.181626567], [15.548348562, 44.181630067], [15.548290956, 44.181650109], [15.548283947, 44.18164267], [15.548261048, 44.181651119], [15.548225204, 44.181663422], [15.548200765, 44.181674289], [15.548172673, 44.181686745], [15.548094293, 44.181723084], [15.548045408, 44.181745268], [15.547974971, 44.181777623], [15.547967672, 44.181780442], [15.547905271, 44.181810883], [15.547882854, 44.181820417], [15.547792703, 44.181888699], [15.547788143, 44.181892262], [15.547778262, 44.181884529], [15.547735494, 44.181915134], [15.547746614, 44.181923597], [15.547742699, 44.181925995], [15.54771002, 44.181951464], [15.547643794, 44.182001944], [15.547648987, 44.182005678], [15.547618393, 44.182041425], [15.547602272, 44.182063881], [15.547570299, 44.182099887], [15.547550103, 44.182157951], [15.547538008, 44.182186742], [15.547531017, 44.182232496], [15.547501744, 44.182232882], [15.547440566, 44.182233902], [15.547323414, 44.182246786], [15.547341139, 44.182272315], [15.547374513, 44.182289154], [15.547359874, 44.182297223], [15.547341071, 44.182307597], [15.547260803, 44.182329068], [15.547204703, 44.182340931], [15.547134266, 44.182357714], [15.54712311, 44.182351501], [15.547240114, 44.182316745], [15.547237687, 44.182312135], [15.547315269, 44.18228659], [15.547281385, 44.182223754], [15.547296978, 44.182218574], [15.547336984, 44.182211887], [15.547382014, 44.182203892], [15.547421151, 44.182196838], [15.547458073, 44.182195256], [15.547492747, 44.182193475], [15.547510271, 44.182192631], [15.547524041, 44.182153054], [15.547519439, 44.182104863], [15.547536815, 44.182105458], [15.547556325, 44.182058908], [15.547578982, 44.182018955], [15.547601434, 44.181999431], [15.547658124, 44.181958591], [15.547663449, 44.181954135], [15.547720774, 44.181912761], [15.547768241, 44.181877695], [15.54780305, 44.181851974], [15.547847674, 44.181814814], [15.547854467, 44.18181235], [15.547888487, 44.181796793], [15.547945961, 44.18176946], [15.547940416, 44.181764284], [15.54794067, 44.181764016], [15.547940923, 44.181763838], [15.548037571, 44.181719281], [15.548059226, 44.181710461], [15.548127673, 44.18168511], [15.548302696, 44.181612314], [15.548335954, 44.181597471], [15.548369125, 44.181588026], [15.548405203, 44.181576716], [15.548478235, 44.181554014], [15.548545403, 44.181530452], [15.548646003, 44.181496728], [15.548711881, 44.181467845], [15.548732814, 44.181457218], [15.548783494, 44.181432259], [15.5488342, 44.18141351], [15.54890924, 44.181390374], [15.548875937, 44.181345814], [15.548886548, 44.181339242], [15.548879875, 44.181334236], [15.548914718, 44.181321926], [15.548933714, 44.181369516], [15.549234381, 44.181315496], [15.549230683, 44.181304305], [15.54925451, 44.181300363], [15.549247456, 44.181280143], [15.549223632, 44.181283905], [15.549206317, 44.181240649], [15.549196657, 44.181242458], [15.549180391, 44.181203981], [15.549170633, 44.181180769], [15.549155227, 44.181151029], [15.549149444, 44.1811373], [15.549138096, 44.181088513], [15.549134135, 44.181078219], [15.549130164, 44.181068466], [15.549125114, 44.181055823], [15.549119949, 44.181042549], [15.549111908, 44.181044822], [15.549090709, 44.181017554], [15.549014933, 44.180923139], [15.549008595, 44.180912825], [15.54895276, 44.180939452], [15.548948836, 44.180926819], [15.548939005, 44.180915936], [15.548951984, 44.180909924], [15.548929377, 44.180884714], [15.548916398, 44.180890727], [15.548888998, 44.180860167], [15.548855999, 44.18082002], [15.548838801, 44.180808446], [15.548800149, 44.180762042], [15.548928833, 44.180739622], [15.548958099, 44.180786308], [15.548992223, 44.180826464], [15.549033075, 44.180899348], [15.549099758, 44.180999269], [15.549134087, 44.181026736], [15.549172659, 44.181070259], [15.549164234, 44.181073069], [15.549172646, 44.181117782], [15.549176953, 44.181145539], [15.549185996, 44.181143184], [15.549189006, 44.18115041], [15.549180853, 44.181151872], [15.549208079, 44.181201061], [15.549233658, 44.181197044], [15.549242255, 44.181222407], [15.549253517, 44.181253192], [15.549333628, 44.181233608], [15.549344067, 44.181230005], [15.549350689, 44.181245991], [15.549353579, 44.181252945], [15.549359049, 44.181270541], [15.549360593, 44.181275685], [15.549351913, 44.181278762], [15.549262812, 44.181313033], [15.549284253, 44.181348583], [15.54926406, 44.181359846], [15.54923844, 44.181374213], [15.549230362, 44.181378736], [15.549229515, 44.181377019], [15.549228299, 44.181374849], [15.549224056, 44.181366443], [15.54921934, 44.181356413], [15.549213044, 44.18134349], [15.549170357, 44.181353576], [15.549149642, 44.181358443], [15.549134576, 44.181362008], [15.549122904, 44.181364521], [15.549096296, 44.18137024], [15.54905633, 44.181374498], [15.548987365, 44.181393184], [15.548968022, 44.181398244]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

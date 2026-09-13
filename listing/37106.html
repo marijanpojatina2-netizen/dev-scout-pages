@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:53</span>
+</header>
+<main>
+<h1>#37106 · OPATIJA, LOVRAN - građevinsko zemljište od 1144 m2</h1>
+<div class="sub">Lovran, Lovran, Primorsko-goranska · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/opatija-lovran-gradevinsko-zemljiste-1144-m2-oglas-45301329" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">59</span>
+        <span class="muted">rule 59 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>272.000 € (229 €/m²) · ratio <b>1,18</b></dd>
+      <dt>Ukupna investicija</dt><dd>2,58 M€</dd>
+      <dt>GBP</dt><dd>951 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>230.000 € (201 €/m²)</dd>
+      <dt>Površina</dt><dd>1.144 m² · DKP 1.189 m² (odstupanje 3,9 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · DUX Nekretnine</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">230.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 951.2, &#39;kis&#39;: 0.8, &#39;nkp&#39;: 713.4000000000001, &#39;noi&#39;: None, &#39;rlv&#39;: 271867.43478260934, &#39;ratio&#39;: 1.1820323251417797, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;obala_visestambeno&#39;, &#39;gdv_neto&#39;: 3138960.0000000005, &#39;cost_soft&#39;: 95120.0, &#39;gdv_bruto&#39;: 3923700.0000000005, &#39;kis_known&#39;: False, &#39;total_inv&#39;: 2583752.0, &#39;cost_build&#39;: 1902400.0, &#39;cost_other&#39;: 342432.0, &#39;cost_sales&#39;: 117711.00000000001, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 228.652173913044, &#39;parcel_area&#39;: 1189.0, &#39;parcelation&#39;: False, &#39;roi_on_cost&#39;: 0.16932623564490729, &#39;profit_at_ask&#39;: 437497.00000000047, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 2583752.0, &#39;parcel_area_effective&#39;: 1189.0, &#39;sale_price_per_m2_nkp&#39;: 5500.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 5.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;none&#39;}, &#39;points&#39;: 0.0}, &#39;location&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;rlv.yaml:pgz_opatija/row2&#39;, &#39;sale_price_per_m2_nkp&#39;: 5500.0}, &#39;points&#39;: 11.5}, &#39;physical&#39;: {&#39;max&#39;: 4.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 19.69, &#39;road_access&#39;: &#39;yes&#39;, &#39;slope_points&#39;: 1.031}, &#39;points&#39;: 3.03}, &#39;liquidity&#39;: {&#39;max&#39;: 3.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.008333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 0.5, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 0.51}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 25.0, &#39;detail&#39;: {&#39;rlv&#39;: 271867, &#39;ratio&#39;: 1.182, &#39;asking_price&#39;: 230000.0}, &#39;points&#39;: 18.64}, &#39;ticket_fit&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;asking_price&#39;: 230000.0}, &#39;points&#39;: 6.13}, &#39;zone_quality&#39;: {&#39;max&#39;: 8.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;zona nepoznata&#39;, &#39;source&#39;: &#39;nepoznato&#39;, &#39;zone_class&#39;: None}, &#39;points&#39;: 2.0}, &#39;profit_potential&#39;: {&#39;max&#39;: 20.0, &#39;detail&#39;: {&#39;roi_on_cost&#39;: 0.169, &#39;profit_at_ask&#39;: 437497}, &#39;points&#39;: 14.5}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Lovran&#39;, &#39;deviation&#39;: 0.16, &#39;ask_eur_m2&#39;: 201, &#39;benchmark_eur_m2&#39;: 239.34}, &#39;points&#39;: 7.4}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zone_uncertainty&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">63,7</td></tr><tr><td>rlv_notes</td><td class="num">[]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;max_gbp&#39;: 951, &#39;total_inv&#39;: 2583752, &#39;zone_code&#39;: None, &#39;zone_class&#39;: None, &#39;zone_source&#39;: &#39;nepoznato&#39;, &#39;zone_reviewed&#39;: None}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 319945, k.č. 163/3 (pin_buffer, 0,88); k.o. 319945, k.č. 194/3 (pin_buffer, 0,80); k.o. 319945, k.č. 169/1 (pin_buffer, 0,76)</dd>
+      <dt>Zona</dt><dd>– (–)</dd>
+      <dt>kig / kis / katnost</dt><dd>– / – / –</dd>
+      <dt>GP / UPU</dt><dd>– · UPU –</dd>
+      <dt>Pristup / nagib</dt><dd>yes · 19,7 % (max 31,6 %)</dd>
+      <dt>More</dt><dd>105 m · red 2 · ZOP 1000</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>0 %</dd>
+      <dt>Match</dt><dd>0,88</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/37106.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 951.2, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 0.8, &#39;source&#39;: &#39;default_profila&#39;}</td></tr><tr><td>sea_row</td><td class="num">{&#39;value&#39;: &#39;2&#39;, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.05, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.75, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 342432.0, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 1189.0, &#39;source&#39;: &#39;dkp&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 230000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 2000.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 5500.0, &#39;source&#39;: &#39;rlv.yaml:pgz_opatija/row2&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table><tr><td>utilities</td><td>[&#39;struja&#39;, &#39;voda&#39;]</td></tr><tr><td>access_road</td><td>yes</td></tr><tr><td>sea_distance_m_claim</td><td>3000.0</td></tr></table></div>
+<h2>Benchmarks mikrolokacije</h2><table><tr><th>Vrsta</th><th class="num">Vrijednost</th><th class="num">n</th><th>Od</th><th>Izvor</th></tr>
+<tr><td>land_ask_eur_m2</td><td class="num">239</td><td class="num">68</td><td>11.09.2026.</td><td>auto</td></tr></table><h2>Opis oglasa</h2><pre>OPATIJA, LOVRAN, OKOLICA - Zemljište s predivnim pogledom na more.
+Iznad Lovrana, gradića duge i bogate prošlosti, sa stoljetnom tradicijom u turizmu, nazvanog po lovoru koji obilno raste na ovom području, u prilici smo ponuditi Vam građevinsko zemljište površine 1144 m² s prekrasnim pogledom na more.
+Parcela je pravilnog, stepenastog oblika, s osiguranim priključcima za struju i vodu. Pristup je omogućen asfaltiranim putem, a vlasništvo je uredno. Zemljište se nalazi 3 kilometra od mora, što je otprilike 5 minuta lagane vožnje automobilom.
+Ova nekretnina s velikim potencijalom idealna je za izgradnju luksuzne vile, pogodne za udoban obiteljski život ili kao investicija u turizam.
+Poštovani potencijalni kupci,
+Drago nam je što pokazujete interes za nekretnine iz naše ponude. Za sva dodatna pitanja i dogovor u vezi s razgledom nekretnine, slobodno nas kontaktirajte.
+Poštovani klijenti, agencijska provizija naplaćuje se u skladu s Općim uvjetima poslovanja
+www.dux-nekretnine.hr/opci-uvjeti-poslovanja
+ID KOD AGENCIJE: 34301
+Denis Kaštelan
+Agent s licencom
+Mob: +385 91 950 4277
+Tel: +385 91 480 8808
+E-mail: denis@dux-nekretnine.hr
+www.dux-opatija.com</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.2952203620855, LNG = 14.275648326179457;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.27545459, 45.295112618], [14.275491076, 45.29511207], [14.275531394, 45.295111325], [14.275532895, 45.295170747], [14.275609841, 45.295169097], [14.275603675, 45.295225669], [14.275630908, 45.29522701], [14.275640459, 45.295168613], [14.27564799, 45.2951684], [14.275642847, 45.295006501], [14.275642095, 45.29498336], [14.275641023, 45.294955352], [14.275640329, 45.294940491], [14.27563969, 45.294917711], [14.275638631, 45.294895913], [14.275796579, 45.294870375], [14.275805691, 45.294868842], [14.275948213, 45.294914993], [14.275967451, 45.294944704], [14.275964068, 45.29508988], [14.275944533, 45.29523078], [14.275938153, 45.29527655], [14.27593116, 45.295276054], [14.275916548, 45.295274779], [14.275752088, 45.295261406], [14.275707093, 45.29525783], [14.275576682, 45.29524755], [14.275447163, 45.295237287], [14.27544482, 45.295205926], [14.275452233, 45.295172865], [14.275453575, 45.295132036], [14.27545459, 45.295112618]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.274671875, 45.295190951], [14.274708267, 45.295075486], [14.274724048, 45.295030619], [14.274745192, 45.294995306], [14.27475966, 45.29498398], [14.274822956, 45.294966226], [14.274967827, 45.294936024], [14.274969457, 45.294946495], [14.274952832, 45.29494779], [14.27498271, 45.295158495], [14.275183709, 45.295143875], [14.275154807, 45.294934269], [14.274991692, 45.294945218], [14.274989145, 45.29493212], [14.275248273, 45.294875348], [14.27525688, 45.294935628], [14.275347816, 45.294928312], [14.275373325, 45.294931328], [14.275385217, 45.29493372], [14.275386178, 45.294941748], [14.275365501, 45.29504987], [14.275335777, 45.295164386], [14.275319612, 45.295183239], [14.275311457, 45.295192888], [14.275290103, 45.2952075], [14.275249615, 45.295222369], [14.275055886, 45.295197806], [14.275005156, 45.295200687], [14.274895124, 45.295197463], [14.274781949, 45.295193097], [14.274671875, 45.295190951]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.276084017, 45.294588462], [14.27609467, 45.29458993], [14.276242079, 45.294608909], [14.276269099, 45.294612405], [14.276470545, 45.294638466], [14.276586624, 45.294653325], [14.276644599, 45.294660753], [14.276643086, 45.294666843], [14.276626074, 45.294664982], [14.27660896, 45.29473097], [14.27669156, 45.294741218], [14.276709123, 45.294673529], [14.276709997, 45.294670756], [14.276845848, 45.29468861], [14.276792981, 45.294824452], [14.276783538, 45.294847485], [14.276770612, 45.294894387], [14.276664293, 45.294877739], [14.27658594, 45.294869733], [14.276453216, 45.294850141], [14.276373756, 45.294841124], [14.276248068, 45.294824188], [14.276134027, 45.294809368], [14.276101302, 45.294805041], [14.276089633, 45.294673071], [14.276084017, 45.294588462]], [[14.276286476, 45.294797309], [14.276356203, 45.294800917], [14.276355533, 45.294811523], [14.276400368, 45.294812666], [14.276401234, 45.294797025], [14.276492955, 45.294798991], [14.2765045, 45.29469285], [14.276412676, 45.294690252], [14.276414094, 45.294670302], [14.276303727, 45.294669142], [14.27629525, 45.294745737], [14.276290794, 45.29474556], [14.276286476, 45.294797309]], [[14.276660584, 45.294864978], [14.276753699, 45.29487696], [14.2767628, 45.294846361], [14.276670195, 45.294834389], [14.276660584, 45.294864978]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

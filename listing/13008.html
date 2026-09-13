@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:53</span>
+</header>
+<main>
+<h1>#13008 · LOVRAN, Kamena kuća sa pogledom na more</h1>
+<div class="sub">Lovran, Lovran, Primorsko-goranska · kuca · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/lovran-kamena-kuca-pogledom-more-oglas-50072651" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">62</span>
+        <span class="muted">rule 62 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>1,44 M€ (822 €/m²) · ratio <b>5,23</b></dd>
+      <dt>Ukupna investicija</dt><dd>3,75 M€</dd>
+      <dt>GBP</dt><dd>1.400 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>275.000 € (157 €/m²)</dd>
+      <dt>Površina</dt><dd>1.750 m² · DKP 2.188 m² (odstupanje 25,0 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · RE/MAX Centar nekretnina</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">275.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="ZOP pojas 70/100 m (−10)">zop_70_100</span> ZOP pojas 70/100 m (−10)<br><span class="flag soft" title="DKP površina odstupa &gt; 15 % (−5)">area_mismatch</span> DKP površina odstupa &gt; 15 % (−5)<br><span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="kuća za rušenje">kuca_za_rusenje</span> kuća za rušenje<br><span class="flag soft" title="površina objekta za rušenje pretpostavljena">rusenje_procjena</span> površina objekta za rušenje pretpostavljena<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 1400.0, &#39;kis&#39;: 0.8, &#39;nkp&#39;: 1050.0, &#39;noi&#39;: None, &#39;rlv&#39;: 1438193.47826087, &#39;ratio&#39;: 5.229794466403164, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;obala_visestambeno&#39;, &#39;gdv_neto&#39;: 5880000.0, &#39;cost_soft&#39;: 140450.0, &#39;gdv_bruto&#39;: 7350000.0, &#39;kis_known&#39;: False, &#39;total_inv&#39;: 3745850.0, &#39;cost_build&#39;: 2809000.0, &#39;cost_other&#39;: 504900.0, &#39;cost_sales&#39;: 220500.0, &#39;demolition&#39;: True, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 821.8248447204971, &#39;parcel_area&#39;: 1750.0, &#39;parcelation&#39;: False, &#39;roi_on_cost&#39;: 0.5108720317150981, &#39;profit_at_ask&#39;: 1913650.0, &#39;cost_demolition&#39;: 9000.0, &#39;total_inv_phase&#39;: 3745850.0, &#39;parcel_area_effective&#39;: 1750.0, &#39;sale_price_per_m2_nkp&#39;: 7000.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;kuca_za_rusenje&#39;, &#39;rusenje_procjena&#39;, &#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 5.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;none&#39;}, &#39;points&#39;: 0.0}, &#39;location&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;rlv.yaml:pgz_opatija/row1&#39;, &#39;sale_price_per_m2_nkp&#39;: 7000.0}, &#39;points&#39;: 15.0}, &#39;physical&#39;: {&#39;max&#39;: 4.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 14.63, &#39;slope_points&#39;: 1.537, &#39;sea_row1_bonus&#39;: True}, &#39;points&#39;: 2.54}, &#39;liquidity&#39;: {&#39;max&#39;: 3.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.008333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 0.5, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 0.51}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 25.0, &#39;detail&#39;: {&#39;rlv&#39;: 1438193, &#39;ratio&#39;: 5.23, &#39;asking_price&#39;: 275000.0}, &#39;points&#39;: 25.0}, &#39;ticket_fit&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;asking_price&#39;: 275000.0}, &#39;points&#39;: 7.33}, &#39;zone_quality&#39;: {&#39;max&#39;: 8.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;zona nepoznata&#39;, &#39;source&#39;: &#39;nepoznato&#39;, &#39;zone_class&#39;: None}, &#39;points&#39;: 2.0}, &#39;profit_potential&#39;: {&#39;max&#39;: 20.0, &#39;detail&#39;: {&#39;roi_on_cost&#39;: 0.511, &#39;profit_at_ask&#39;: 1913650}, &#39;points&#39;: 20.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Lovran&#39;, &#39;deviation&#39;: 0.343, &#39;ask_eur_m2&#39;: 157, &#39;benchmark_eur_m2&#39;: 239.34}, &#39;points&#39;: 9.43}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zop_70_100&#39;: 10, &#39;area_mismatch&#39;: 5, &#39;zone_uncertainty&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">81,8</td></tr><tr><td>rlv_notes</td><td class="num">[&#39;DKP površina odstupa 25 % → koristi se oglašena&#39;]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;max_gbp&#39;: 1400, &#39;zop_band&#39;: &#39;70&#39;, &#39;total_inv&#39;: 3745850, &#39;zone_code&#39;: None, &#39;zone_class&#39;: None, &#39;zone_source&#39;: &#39;nepoznato&#39;, &#39;zone_reviewed&#39;: None, &#39;area_mismatch_pct&#39;: 25.0}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 319945, k.č. 50 (pin_buffer, 0,68); k.o. 319945, k.č. 58/1 (pin_buffer, 0,63); k.o. 319945, k.č. 47/1 (pin_buffer, 0,61)</dd>
+      <dt>Zona</dt><dd>– (–)</dd>
+      <dt>kig / kis / katnost</dt><dd>– / – / –</dd>
+      <dt>GP / UPU</dt><dd>– · UPU –</dd>
+      <dt>Pristup / nagib</dt><dd>unknown · 14,6 % (max 26,2 %)</dd>
+      <dt>More</dt><dd>12 m · red 1 · ZOP 70</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>0 %</dd>
+      <dt>Match</dt><dd>0,68</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/13008.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 1400.0, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 0.8, &#39;source&#39;: &#39;default_profila&#39;}</td></tr><tr><td>sea_row</td><td class="num">{&#39;value&#39;: &#39;1&#39;, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.05, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.75, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 504900.0, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 1750.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 275000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>demolition_cost</td><td class="num">{&#39;value&#39;: 9000.0, &#39;source&#39;: &#39;profil × m²&#39;}</td></tr><tr><td>existing_building_m2</td><td class="num">{&#39;value&#39;: 150.0, &#39;source&#39;: &#39;pretpostavka&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 2000.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 7000.0, &#39;source&#39;: &#39;rlv.yaml:pgz_opatija/row1&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table></table></div>
+<h2>Benchmarks mikrolokacije</h2><table><tr><th>Vrsta</th><th class="num">Vrijednost</th><th class="num">n</th><th>Od</th><th>Izvor</th></tr>
+<tr><td>land_ask_eur_m2</td><td class="num">239</td><td class="num">68</td><td>11.09.2026.</td><td>auto</td></tr></table><h2>Opis oglasa</h2><pre>Na odličnoj lokaciji u blizini mora i centra Lovrana prodajemo dvojnu autohtonu kamenu kuću sa velikom okućnicom i predivnim otvorenim pogledom na more.
+Kat kuće sastoji se od dvije spavaće sobe, kuhinje sa tornicom, kupaone i hodnika. U suterenu se nalazi konoba koja se dodatno može preurediti u stambeni prostor.
+Na velikoj okućnici nalazi se još jedna ucrtana starina koju je moguće urediti za stambeni ili neki drugi sadržaj.
+Odlična nekretnina sa velikim potencijalom u blizini mora.
+ID KOD AGENCIJE: 300421005-770
+Andrea Mustać
+Prodajni predstavnik
+Mob: +385 91 641 3156
+Tel: +385 51 551 871
+Licenca: 21/2015
+E-mail: a.mustac@remax-opatija.hr
+remax-centarnekretnina.com</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.29046472550025, LNG = 14.278293232091752;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.277029319, 45.290911327], [14.277039687, 45.290884172], [14.277039547, 45.290864912], [14.277166454, 45.290856944], [14.277170058, 45.290875642], [14.277359173, 45.290861327], [14.27735761, 45.290852387], [14.277379134, 45.290846417], [14.277389069, 45.290840132], [14.277392898, 45.290830218], [14.277389803, 45.290821338], [14.277381097, 45.29081577], [14.277350468, 45.290810044], [14.277349008, 45.290801737], [14.277159505, 45.290819464], [14.27716307, 45.290839151], [14.277037819, 45.290847151], [14.277046807, 45.290832478], [14.27711097, 45.29073042], [14.277174655, 45.290627544], [14.277181546, 45.290620839], [14.277230948, 45.290593095], [14.277238803, 45.290591088], [14.277265432, 45.290591517], [14.277607724, 45.290585312], [14.277642182, 45.290584363], [14.277908805, 45.290579925], [14.27794379, 45.290585105], [14.277948892, 45.290833032], [14.277948895, 45.290842751], [14.277903668, 45.290841961], [14.277784378, 45.290857276], [14.277633285, 45.290919756], [14.277620118, 45.29092067], [14.277555752, 45.290926796], [14.277275242, 45.290917915], [14.277226741, 45.290916071], [14.277107326, 45.290918245], [14.277030983, 45.290914419], [14.277029319, 45.290911327]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.276715918, 45.29039688], [14.276724336, 45.290380486], [14.276705426, 45.290368509], [14.276710305, 45.290354566], [14.276739769, 45.290331383], [14.276748564, 45.290337943], [14.276800381, 45.290369099], [14.276815705, 45.290378216], [14.27685918, 45.290374923], [14.276891194, 45.290364748], [14.276941245, 45.290366083], [14.27701903, 45.290391714], [14.277040439, 45.290434336], [14.277051842, 45.290452465], [14.277128344, 45.290481581], [14.277161478, 45.290462339], [14.277168141, 45.290461479], [14.277129455, 45.290518408], [14.277098455, 45.290564598], [14.277090312, 45.290577218], [14.277071756, 45.290605113], [14.277055954, 45.290634322], [14.277007755, 45.290742179], [14.277000494, 45.290758325], [14.276954098, 45.290767861], [14.276927323, 45.29075816], [14.276883595, 45.290728782], [14.276822493, 45.290687278], [14.27677373, 45.290656272], [14.276771363, 45.290658116], [14.276699531, 45.290610643], [14.276691415, 45.290606255], [14.276646903, 45.290577402], [14.276595963, 45.290546624], [14.276622271, 45.290525899], [14.276628445, 45.29052125], [14.276662472, 45.290495456], [14.27672238, 45.290450099], [14.276750856, 45.290416278], [14.276729788, 45.290404079], [14.276715918, 45.29039688]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[14.277875553, 45.290380313], [14.277890331, 45.290334887], [14.277896198, 45.290308725], [14.277906782, 45.290259707], [14.277931537, 45.290246061], [14.277924728, 45.290227841], [14.278024469, 45.290200536], [14.278036149, 45.290110415], [14.278040291, 45.29007945], [14.278042511, 45.290061765], [14.278087666, 45.289715199], [14.278096429, 45.289647519], [14.278210279, 45.289647395], [14.278131205, 45.290411926], [14.278141692, 45.290420859], [14.278196056, 45.290471681], [14.278015001, 45.29043963], [14.277875553, 45.290380313]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

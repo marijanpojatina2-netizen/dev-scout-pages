@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:53</span>
+</header>
+<main>
+<h1>#44224 · Poreč okolica, građevinsko zemljište sa pogledom na prirodu</h1>
+<div class="sub">Poreč, Poreč, Istarska · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/porec-okolica-gradevinsko-zemljiste-pogledom-prirodu-oglas-45021425" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-hi">71</span>
+        <span class="muted">rule 71 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>3,58 M€ (673 €/m²) · ratio <b>6,70</b></dd>
+      <dt>Ukupna investicija</dt><dd>10,36 M€</dd>
+      <dt>GBP</dt><dd>3.827 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>534.000 € (90 €/m²)</dd>
+      <dt>Površina</dt><dd>5.937 m² · DKP 5.315 m² (odstupanje -10,5 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · Matrix Real Estate</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">534.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="ZOP pojas 70/100 m (−10)">zop_70_100</span> ZOP pojas 70/100 m (−10)<br><span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="fazni projekt / parcelacija">parcelacija</span> fazni projekt / parcelacija<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 3826.548, &#39;kis&#39;: 0.8, &#39;nkp&#39;: 2869.911, &#39;noi&#39;: None, &#39;rlv&#39;: 3576574.5926086972, &#39;ratio&#39;: 6.697705229604302, &#39;value&#39;: None, &#39;phases&#39;: 3, &#39;profile&#39;: &#39;obala_visestambeno&#39;, &#39;gdv_neto&#39;: 16071501.6, &#39;cost_soft&#39;: 765309.6000000001, &#39;gdv_bruto&#39;: 20089377.0, &#39;kis_known&#39;: False, &#39;total_inv&#39;: 10362002.879999999, &#39;cost_build&#39;: 7653096.0, &#39;cost_other&#39;: 1377557.28, &#39;cost_sales&#39;: 602681.3099999999, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 672.9652173913047, &#39;parcel_area&#39;: 5314.65, &#39;parcelation&#39;: True, &#39;roi_on_cost&#39;: 0.4928407634258446, &#39;profit_at_ask&#39;: 5106817.41, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 3831360.9599999995, &#39;parcel_area_effective&#39;: 4783.1849999999995, &#39;sale_price_per_m2_nkp&#39;: 7000.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;parcelacija&#39;, &#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 5.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;none&#39;}, &#39;points&#39;: 0.0}, &#39;location&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;rlv.yaml:istra_zapad/row1&#39;, &#39;sale_price_per_m2_nkp&#39;: 7000.0}, &#39;points&#39;: 15.0}, &#39;physical&#39;: {&#39;max&#39;: 4.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 5.17, &#39;slope_points&#39;: 2.0, &#39;sea_row1_bonus&#39;: True}, &#39;points&#39;: 3.0}, &#39;liquidity&#39;: {&#39;max&#39;: 3.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.008333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 0.5, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 0.51}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 25.0, &#39;detail&#39;: {&#39;rlv&#39;: 3576575, &#39;ratio&#39;: 6.698, &#39;asking_price&#39;: 534000.0}, &#39;points&#39;: 25.0}, &#39;ticket_fit&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;asking_price&#39;: 534000.0}, &#39;points&#39;: 10.0}, &#39;zone_quality&#39;: {&#39;max&#39;: 8.0, &#39;detail&#39;: {&#39;reason&#39;: &#39;zona nepoznata&#39;, &#39;source&#39;: &#39;nepoznato&#39;, &#39;zone_class&#39;: None}, &#39;points&#39;: 2.0}, &#39;profit_potential&#39;: {&#39;max&#39;: 20.0, &#39;detail&#39;: {&#39;roi_on_cost&#39;: 0.493, &#39;profit_at_ask&#39;: 5106817}, &#39;points&#39;: 20.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Poreč&#39;, &#39;deviation&#39;: 0.483, &#39;ask_eur_m2&#39;: 90, &#39;benchmark_eur_m2&#39;: 173.89}, &#39;points&#39;: 10.0}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zop_70_100&#39;: 10, &#39;zone_uncertainty&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">85,5</td></tr><tr><td>rlv_notes</td><td class="num">[&#39;parcelacija: &gt; 2500 m² → fazni projekt, −10 % površine, +5 % soft&#39;, &#39;fazni projekt: 3 faze; investicija prve faze 3,831,361 €&#39;]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;phases&#39;: 3, &#39;max_gbp&#39;: 3827, &#39;zop_band&#39;: &#39;70&#39;, &#39;total_inv&#39;: 10362003, &#39;zone_code&#39;: None, &#39;zone_class&#39;: None, &#39;zone_source&#39;: &#39;nepoznato&#39;, &#39;zone_reviewed&#39;: None, &#39;total_inv_phase&#39;: 3831361}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 323748, k.č. 3870/1 (pin_buffer, 0,75); k.o. 323748, k.č. 3901/36 (pin_buffer, 0,71); k.o. 323748, k.č. 3839 (pin_buffer, 0,71)</dd>
+      <dt>Zona</dt><dd>– (–)</dd>
+      <dt>kig / kis / katnost</dt><dd>– / – / –</dd>
+      <dt>GP / UPU</dt><dd>– · UPU –</dd>
+      <dt>Pristup / nagib</dt><dd>unknown · 5,2 % (max 10,0 %)</dd>
+      <dt>More</dt><dd>4 m · red 1 · ZOP 70</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>0 %</dd>
+      <dt>Match</dt><dd>0,75</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/44224.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 3826.548, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 0.8, &#39;source&#39;: &#39;default_profila&#39;}</td></tr><tr><td>sea_row</td><td class="num">{&#39;value&#39;: &#39;1&#39;, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.1, &#39;source&#39;: &#39;profil+parcelacija&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.75, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 1377557.28, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 5314.65, &#39;source&#39;: &#39;dkp&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 534000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 2000.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 7000.0, &#39;source&#39;: &#39;rlv.yaml:istra_zapad/row1&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table></table></div>
+<h2>Benchmarks mikrolokacije</h2><table><tr><th>Vrsta</th><th class="num">Vrijednost</th><th class="num">n</th><th>Od</th><th>Izvor</th></tr>
+<tr><td>land_ask_eur_m2</td><td class="num">174</td><td class="num">302</td><td>11.09.2026.</td><td>auto</td></tr><tr><td>newbuild_sale_eur_m2_nkp</td><td class="num">3.695</td><td class="num">8</td><td>11.09.2026.</td><td>auto</td></tr></table><h2>Opis oglasa</h2><pre>Predstavljamo vam prostrano građevinsko zemljište ukupne površine od 5937 m2, koje se nalazi u mirnom naselju u okolici Poreča. Ovo prekrasno zemljište pruža nevjerojatan panoramski pogled na prirodu, a buduće građevine sa prvog kata će imati pogled na more.
+Zemljište je u potpunosti građevinsko i stambene je namjene. Lokacija samog zemljišta garantira miran i ugodan život u mirnom naselju, dok istovremeno nudi brz i lak pristup svim glavnim sadržajima i atrakcijama koje Poreč nudi.
+Ovo je definitivno jedinstvena prilika za investitore koji traže prostrano zemljište za izgradnju više kuća za odmor, ili za one koji traže prekrasno imanje sa širokom okućnicom. Bez obzira tražite li mirno utočište kako biste pobjegli od užurbanosti svakodnevnog života ili tražite priliku za ulaganje, ova nekretnina će zasigurno ispuniti i nadmašiti sva vaša očekivanja.
+ID KOD AGENCIJE: ID0160
+Kristijan Benić
+Agent s licencom
+Mob: +385 95 905 75 31
+Tel: +385 52 417 779
+E-mail: kristijan@matrixrealestate.hr
+www.matrixrealestate.hr</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.22979674591413, LNG = 13.599936766369266;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[13.599422383, 45.229027657], [13.599653146, 45.229380341], [13.599679119, 45.229420507], [13.599692257, 45.229442618], [13.599708888, 45.229478677], [13.599727626, 45.229525857], [13.599746734, 45.229570798], [13.599760452, 45.229609032], [13.599768719, 45.229636779], [13.599773847, 45.229663636], [13.599778048, 45.22968867], [13.599780477, 45.229718518], [13.599781362, 45.229746167], [13.59977914, 45.229774817], [13.599774834, 45.229799365], [13.599767302, 45.22982725], [13.599755195, 45.229867438], [13.599742328, 45.229900047], [13.599586985, 45.229861993], [13.599578251, 45.229885978], [13.599417246, 45.229864068], [13.599402232, 45.229943867], [13.599557419, 45.22995996], [13.599551637, 45.229973491], [13.599524302, 45.229967577], [13.599515595, 45.229966006], [13.599449347, 45.229953973], [13.599442769, 45.229955606], [13.599320944, 45.230044659], [13.599337531, 45.229851423], [13.599178099, 45.229853669], [13.599176918, 45.2297668], [13.599193302, 45.229670118], [13.599196225, 45.229637706], [13.599195435, 45.229613208], [13.599192503, 45.229593246], [13.59918837, 45.229579373], [13.599180104, 45.229564134], [13.599173484, 45.229556587], [13.599167282, 45.22954833], [13.599163443, 45.229538694], [13.599162142, 45.229529212], [13.599164835, 45.229518842], [13.599165061, 45.229509398], [13.599163598, 45.229498113], [13.599159319, 45.229487115], [13.599148028, 45.22947126], [13.599137749, 45.22945804], [13.599132579, 45.22944702], [13.599112617, 45.229391349], [13.599106803, 45.229377973], [13.599102091, 45.229370474], [13.599092683, 45.229360156], [13.599081131, 45.229349423], [13.599070118, 45.229343114], [13.59905603, 45.229334657], [13.599045086, 45.229327], [13.599034669, 45.229318996], [13.599021909, 45.229306973], [13.599013027, 45.229298828], [13.599003195, 45.229291829], [13.598990006, 45.229285734], [13.598975904, 45.229280066], [13.598969196, 45.229276746], [13.598963443, 45.22927219], [13.598957172, 45.229265282], [13.598949808, 45.229254836], [13.59894215, 45.229242672], [13.598935189, 45.229234306], [13.598928873, 45.229228297], [13.59891984, 45.229223117], [13.598915063, 45.229219396], [13.598907544, 45.229212006], [13.598900202, 45.22920363], [13.598896538, 45.229198048], [13.598888214, 45.229191447], [13.598876366, 45.229184037], [13.59884186, 45.229163902], [13.598832237, 45.229157808], [13.598823654, 45.22915129], [13.598815677, 45.229142898], [13.598811372, 45.22913739], [13.598805177, 45.229124004], [13.598800833, 45.229116784], [13.598790826, 45.229103211], [13.598787259, 45.229095741], [13.598785595, 45.22908589], [13.598784106, 45.229072624], [13.59878391, 45.229026454], [13.598786391, 45.228962715], [13.598795826, 45.228874945], [13.598799146, 45.228852262], [13.598802264, 45.228836053], [13.598807549, 45.22881729], [13.598813881, 45.228805482], [13.59882401, 45.228794131], [13.598836638, 45.228781224], [13.598847603, 45.228770974], [13.598853947, 45.228761416], [13.598854489, 45.22875828], [13.598915864, 45.228798446], [13.599015791, 45.228839322], [13.599143806, 45.228883791], [13.599172012, 45.228877579], [13.599224271, 45.228929212], [13.599330115, 45.228973927], [13.599394771, 45.229037214], [13.599422383, 45.229027657]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[13.601551323, 45.227299689], [13.60154387, 45.227311018], [13.601445723, 45.227317794], [13.601371827, 45.227353533], [13.601324226, 45.227665937], [13.601321013, 45.227686553], [13.601200627, 45.228475942], [13.60119866, 45.22848957], [13.601196934, 45.228500955], [13.60116501, 45.22871045], [13.601145546, 45.228707526], [13.601119446, 45.228719911], [13.601047204, 45.228735624], [13.600960182, 45.228731433], [13.600835803, 45.228690568], [13.600681247, 45.22869717], [13.600542979, 45.228691497], [13.599847624, 45.228784604], [13.59967264, 45.228817233], [13.599678507, 45.22883457], [13.599635347, 45.22885435], [13.599591854, 45.228943234], [13.599593677, 45.228962449], [13.599516959, 45.228840903], [13.599403068, 45.228666578], [13.599464333, 45.228686403], [13.59952674, 45.228711297], [13.599574465, 45.228716919], [13.599755406, 45.22870487], [13.600006817, 45.228676883], [13.600507991, 45.228608268], [13.600679793, 45.228578077], [13.600810529, 45.228544053], [13.600869279, 45.228493172], [13.600948551, 45.228441912], [13.600954082, 45.228420815], [13.600955049, 45.228409321], [13.60095517, 45.228384397], [13.601122361, 45.227340897], [13.601089072, 45.227309365], [13.60104528, 45.227284045], [13.600899211, 45.227254057], [13.600835265, 45.227254412], [13.600771846, 45.227294466], [13.600748231, 45.227280548], [13.600776745, 45.227260755], [13.600817767, 45.227245419], [13.600827088, 45.227242416], [13.600877127, 45.227237568], [13.600937212, 45.227238015], [13.60102613, 45.227242433], [13.601098694, 45.227250396], [13.601547741, 45.227295008], [13.601551323, 45.227299689]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[13.600455285, 45.230324737], [13.600528346, 45.23044313], [13.600553728, 45.230487419], [13.600577405, 45.230522667], [13.60060004, 45.230550869], [13.600617474, 45.23056616], [13.600649915, 45.230636906], [13.600691071, 45.230726591], [13.600703109, 45.230752814], [13.600697054, 45.230979434], [13.600588176, 45.23120947], [13.600588295, 45.231219642], [13.600595651, 45.231227748], [13.600554144, 45.231285096], [13.600547067, 45.231296525], [13.600532016, 45.231329529], [13.600185916, 45.23211921], [13.600023975, 45.232555953], [13.599989394, 45.232639845], [13.599974055, 45.232673471], [13.599918803, 45.232798142], [13.599865953, 45.232913155], [13.599847599, 45.232955973], [13.599814801, 45.233094893], [13.599805833, 45.233095925], [13.599795343, 45.233099348], [13.599784924, 45.233106373], [13.599774367, 45.233116093], [13.599616453, 45.233155904], [13.599685584, 45.232878694], [13.599692753, 45.232877977], [13.599699713, 45.232873834], [13.599708334, 45.232864604], [13.599724365, 45.232839905], [13.599756755, 45.232789074], [13.59979028, 45.232738452], [13.599820562, 45.232686488], [13.599859109, 45.232617276], [13.599878615, 45.232579346], [13.599884931, 45.232562859], [13.599889375, 45.232545604], [13.599941764, 45.232397103], [13.59991743, 45.232369757], [13.599955011, 45.232291972], [13.600098304, 45.231973901], [13.600037549, 45.231901445], [13.600068767, 45.231861114], [13.600293582, 45.231442616], [13.600357862, 45.231370728], [13.600381222, 45.231337126], [13.600410036, 45.231271446], [13.60048252, 45.231105907], [13.6005467, 45.230953386], [13.600552478, 45.230847345], [13.600556155, 45.230775087], [13.600543823, 45.230747147], [13.600530019, 45.230705581], [13.600483611, 45.230628991], [13.600402009, 45.230498233], [13.600239059, 45.230241762], [13.599997785, 45.229842737], [13.600009191, 45.229843836], [13.600105036, 45.229819815], [13.600148638, 45.229808865], [13.600213667, 45.229902396], [13.600264594, 45.229975232], [13.600269891, 45.229988775], [13.60028785, 45.230033776], [13.600298307, 45.230058519], [13.600301829, 45.230066888], [13.600406532, 45.230241698], [13.600455285, 45.230324737]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

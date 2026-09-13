@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEV-SCOUT — top prilike</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">DEV-SCOUT</a>
+  <a href="zagreb.html">Zagreb</a>
+  <a href="obala.html">Obala</a>
+  <a href="ispod_praga.html">Ispod praga</a>
+  <a href="offmarket.html">Off-market</a>
+  <a href="deepdive/index.html">Deep-dive</a>
+  <a href="review/index.html">Self-review</a>
+  <a href="stats.html">Statistika</a>
+  <span class="gen">generirano 13.09.2026. 15:19</span>
+</header>
+<main>
+<h1>DEV-SCOUT — top prilike</h1>
+<div class="sub">Top 0 aktivnih oglasa sa score ≥ 70 · 0 oglasa</div>
+<div class="filters">
+  <label>Geo <select id="f-geo"><option value="">sve</option></select></label>
+  <label>Tip <select id="f-cat"><option value="">svi</option></select></label>
+  <label>Score ≥ <input id="f-score" type="number" min="0" max="100" value="0" style="width:60px"></label>
+  <label>Flag <select id="f-flag"><option value="">bilo koji</option></select></label>
+  <label>Bez flaga <select id="f-noflag"><option value="">–</option></select></label>
+  <span class="muted" id="f-count"></span>
+</div>
+<div id="map"></div>
+<table id="tbl">
+<thead><tr>
+  <th data-k="id">#</th><th data-k="loc">Lokacija</th><th data-k="geo">Geo</th><th data-k="cat">Tip</th>
+  <th class="num" data-k="area">m²</th><th class="num" data-k="price">Cijena</th><th class="num" data-k="eurm2">€/m²</th>
+  <th data-k="zone">Zona</th><th class="num" data-k="gbp">GBP</th><th class="num" data-k="rlv">RLV €/m²</th>
+  <th class="num" data-k="ratio">Ratio</th><th class="num" data-k="score">Score</th><th data-k="flags">Flagovi</th>
+  <th class="num" data-k="dom">Dana</th><th data-k="fb">Feedback</th>
+</tr></thead>
+<tbody>
+</tbody>
+</table>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var MARKERS = [];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var layer = L.layerGroup().addTo(map);
+function color(s){ return s >= 70 ? '#0b6e4f' : (s >= 55 ? '#b3540f' : '#888'); }
+function drawMarkers(ids){
+  layer.clearLayers(); var pts = [];
+  MARKERS.forEach(function(m){ if (ids && !ids.has(m.id)) return; if (!m.lat || !m.lng) return;
+    L.circleMarker([m.lat, m.lng], {radius: 7, color: color(m.score||0), fillOpacity: .8}).bindPopup('<a href="'+m.href+'">'+m.label+'</a> · score '+(m.score||'–')).addTo(layer); pts.push([m.lat, m.lng]); });
+  if (pts.length) map.fitBounds(pts, {padding:[20,20]}); else map.setView([45.1, 15.2], 7);
+}
+function applyFilters(){
+  var geo = document.getElementById('f-geo').value, cat = document.getElementById('f-cat').value,
+      sc = parseFloat(document.getElementById('f-score').value||0), fl = document.getElementById('f-flag').value,
+      nf = document.getElementById('f-noflag').value, n = 0, ids = new Set();
+  document.querySelectorAll('#tbl tbody tr').forEach(function(tr){
+    var flags = tr.dataset.flags.split(' ');
+    var ok = (!geo || tr.dataset.geo === geo) && (!cat || tr.dataset.cat === cat) && parseFloat(tr.dataset.score) >= sc
+          && (!fl || flags.indexOf(fl) >= 0) && (!nf || flags.indexOf(nf) < 0);
+    tr.style.display = ok ? '' : 'none'; if (ok) { n++; ids.add(parseInt(tr.dataset.id)); }
+  });
+  document.getElementById('f-count').textContent = n + ' prikazano'; drawMarkers(ids);
+}
+['f-geo','f-cat','f-score','f-flag','f-noflag'].forEach(function(id){ document.getElementById(id).addEventListener('input', applyFilters); });
+document.querySelectorAll('#tbl th').forEach(function(th, i){ th.addEventListener('click', function(){
+  var tb = th.closest('table').querySelector('tbody'), rows = Array.from(tb.querySelectorAll('tr'));
+  var asc = th.dataset.asc !== '1'; th.dataset.asc = asc ? '1' : '0';
+  rows.sort(function(a,b){ var ca=a.children[i], cb=b.children[i]; var va = ca.dataset.v !== undefined ? parseFloat(ca.dataset.v) : ca.textContent.trim().toLowerCase();
+    var vb = cb.dataset.v !== undefined ? parseFloat(cb.dataset.v) : cb.textContent.trim().toLowerCase(); return (va > vb ? 1 : va < vb ? -1 : 0) * (asc ? 1 : -1); });
+  rows.forEach(function(r){ tb.appendChild(r); }); }); });
+applyFilters();
+</script>
+</body>
+</html>

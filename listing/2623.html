@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:53</span>
+</header>
+<main>
+<h1>#2623 · Šestine, građevinsko zemljište 1228m2</h1>
+<div class="sub">Šestine, Podsljeme, Grad Zagreb · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/sestine-gradevinsko-zemljiste-1228m2-oglas-51433457" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">57</span>
+        <span class="muted">rule 57 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>961.000 € (869 €/m²) · ratio <b>3,21</b></dd>
+      <dt>Ukupna investicija</dt><dd>3,7 M€</dd>
+      <dt>GBP</dt><dd>1.660 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>299.000 € (243 €/m²)</dd>
+      <dt>Površina</dt><dd>1.228 m² · DKP 1.107 m² (odstupanje -9,9 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · UNITED NEKRETNINE</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">299.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="zgrade na čestici bez spomena rušenja (−10)">zgrade_bez_rusenja</span> zgrade na čestici bez spomena rušenja (−10)<br><span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 1659.855, &#39;kis&#39;: 1.5, &#39;nkp&#39;: 1361.0810999999999, &#39;noi&#39;: None, &#39;rlv&#39;: 961067.5918173915, &#39;ratio&#39;: 3.2142728823324127, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;zagreb_visestambeno&#39;, &#39;gdv_neto&#39;: 5226551.424, &#39;cost_soft&#39;: 109550.43000000001, &#39;gdv_bruto&#39;: 6533189.279999999, &#39;kis_known&#39;: True, &#39;total_inv&#39;: 3704704.055, &#39;cost_build&#39;: 2738760.75, &#39;cost_other&#39;: 539452.875, &#39;cost_sales&#39;: 195995.67839999998, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;kis&#39;, &#39;rlv_per_m2&#39;: 868.5104347826089, &#39;parcel_area&#39;: 1106.57, &#39;parcelation&#39;: False, &#39;roi_on_cost&#39;: 0.357883294027382, &#39;profit_at_ask&#39;: 1325851.6905999994, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 3704704.055, &#39;parcel_area_effective&#39;: 1106.57, &#39;sale_price_per_m2_nkp&#39;: 4800.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 5.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;none&#39;}, &#39;points&#39;: 0.0}, &#39;location&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;benchmark:override:Šestine&#39;, &#39;sale_price_per_m2_nkp&#39;: 4800.0}, &#39;points&#39;: 8.75}, &#39;physical&#39;: {&#39;max&#39;: 4.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 12.67, &#39;road_access&#39;: &#39;yes&#39;, &#39;slope_points&#39;: 1.733}, &#39;points&#39;: 3.73}, &#39;liquidity&#39;: {&#39;max&#39;: 3.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.008333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 0.5, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 0.51}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 25.0, &#39;detail&#39;: {&#39;rlv&#39;: 961068, &#39;ratio&#39;: 3.214, &#39;asking_price&#39;: 299000.0}, &#39;points&#39;: 25.0}, &#39;ticket_fit&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;asking_price&#39;: 299000.0}, &#39;points&#39;: 7.97}, &#39;zone_quality&#39;: {&#39;max&#39;: 8.0, &#39;detail&#39;: {&#39;no_upu&#39;: True, &#39;source&#39;: &#39;gis&#39;, &#39;zone_class&#39;: &#39;mjesovito_pretezito_stambeno&#39;, &#39;zone_ideal&#39;: True, &#39;gp_uredjeni&#39;: True}, &#39;points&#39;: 6.0}, &#39;profit_potential&#39;: {&#39;max&#39;: 20.0, &#39;detail&#39;: {&#39;roi_on_cost&#39;: 0.358, &#39;profit_at_ask&#39;: 1325852}, &#39;points&#39;: 20.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Podsljeme&#39;, &#39;deviation&#39;: -0.522, &#39;ask_eur_m2&#39;: 243, &#39;benchmark_eur_m2&#39;: 160.0}, &#39;points&#39;: 0.0}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zone_uncertainty&#39;: 5, &#39;zgrade_bez_rusenja&#39;: 10}</td></tr><tr><td>raw_score</td><td class="num">72,0</td></tr><tr><td>rlv_notes</td><td class="num">[]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;max_gbp&#39;: 1660, &#39;total_inv&#39;: 3704704, &#39;zone_code&#39;: &#39;M1&#39;, &#39;zone_class&#39;: &#39;mjesovito_pretezito_stambeno&#39;, &#39;zone_source&#39;: &#39;gis&#39;, &#39;zone_reviewed&#39;: False, &#39;commercial_pct&#39;: 0.0, &#39;buildings_share&#39;: 0.183, &#39;commercial_source&#39;: &#39;zone_rule&#39;}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 335258, k.č. 1611 (pin_buffer, 0,80); k.o. 335258, k.č. 1614/1 (pin_buffer, 0,77); k.o. 335258, k.č. 1613/1 (pin_buffer, 0,74)</dd>
+      <dt>Zona</dt><dd>M1 (mjesovito_pretezito_stambeno) · NIJE pregledana</dd>
+      <dt>kig / kis / katnost</dt><dd>0,40 / 1,50 / Po+P+3+Pk</dd>
+      <dt>GP / UPU</dt><dd>uredjeni · UPU ne</dd>
+      <dt>Pristup / nagib</dt><dd>yes · 12,7 % (max 16,3 %)</dd>
+      <dt>More</dt><dd>–</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>18 %</dd>
+      <dt>Match</dt><dd>0,80</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/2623.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 1659.855, &#39;source&#39;: &#39;kis&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 1.5, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.04, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.82, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 539452.875, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 1106.57, &#39;source&#39;: &#39;dkp&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 299000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 1650.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 4800.0, &#39;source&#39;: &#39;benchmark:override:Šestine&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table><tr><td>zone_claim</td><td>S</td></tr></table></div>
+<h2>Benchmarks mikrolokacije</h2><table><tr><th>Vrsta</th><th class="num">Vrijednost</th><th class="num">n</th><th>Od</th><th>Izvor</th></tr>
+<tr><td>newbuild_sale_eur_m2_nkp</td><td class="num">4.800</td><td class="num">–</td><td>12.09.2026.</td><td>override</td></tr></table><h2>Opis oglasa</h2><pre>U naselju Šestine, prodaje se građevinsko zemljište površine 1228 m2.
+Nalazi se u ulici Šestinski vrh. Zemljište je sa strane ceste široko 22 metra, a duljina je 55 metara.
+Može se graditi jedan objekt od 400 BRP ili dvojni objekt od 600 BRP ili dva samomostojeća objekta svaki od 376 BRP.
+Sva infrastuktura se nalazi na cesti pokraj parcele. 
+Nalazi se u zoni urbanih pravila 2.2., cijelom površinom unutar stambene zone (S).
+ID KOD AGENCIJE: 112
+Mijo Radovčić
+Agent s licencom
+Mob: 0914442909
+Tel: +385 99 535 5034
+E-mail: mijo@united-nekretnine.hr
+www.united-nekretnine.hr</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.85460400025528, LNG = 15.953268588136202;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.952759685, 45.853906055], [15.952792765, 45.853854835], [15.95282296, 45.853809001], [15.952839301, 45.853784065], [15.952889312, 45.853713311], [15.952994822, 45.853550684], [15.953190503, 45.853594721], [15.953081465, 45.853775776], [15.953040018, 45.853839823], [15.953034657, 45.853848165], [15.952964837, 45.853956076], [15.952859818, 45.854121044], [15.952847512, 45.85414159], [15.952839692, 45.854138043], [15.952767556, 45.85412753], [15.952638392, 45.854102258], [15.952705143, 45.853992263], [15.952759685, 45.853906055]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.954283585, 45.853978937], [15.953926236, 45.853875464], [15.953862775, 45.853952183], [15.953488747, 45.853829373], [15.953585363, 45.85368065], [15.953885146, 45.853771522], [15.954208118, 45.853834971], [15.954391296, 45.853893702], [15.95448801, 45.853932225], [15.954487219, 45.853947337], [15.954490973, 45.85397165], [15.954335653, 45.8539216], [15.954283585, 45.853978937]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[15.953338486, 45.853933479], [15.953285724, 45.853916941], [15.953214734, 45.853894646], [15.953040018, 45.853839823], [15.953081465, 45.853775776], [15.953190503, 45.853594721], [15.953318103, 45.853621875], [15.95337953, 45.853634496], [15.953585363, 45.85368065], [15.953488747, 45.853829373], [15.953441896, 45.853906171], [15.953371694, 45.85388235], [15.953338486, 45.853933479]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>

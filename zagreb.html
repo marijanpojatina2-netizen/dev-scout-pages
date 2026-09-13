@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEV-SCOUT — Zagreb</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">DEV-SCOUT</a>
+  <a href="zagreb.html">Zagreb</a>
+  <a href="obala.html">Obala</a>
+  <a href="ispod_praga.html">Ispod praga</a>
+  <a href="offmarket.html">Off-market</a>
+  <a href="deepdive/index.html">Deep-dive</a>
+  <a href="review/index.html">Self-review</a>
+  <a href="stats.html">Statistika</a>
+  <span class="gen">generirano 13.09.2026. 15:19</span>
+</header>
+<main>
+<h1>DEV-SCOUT — Zagreb</h1>
+<div class="sub">Top 50 aktivnih oglasa (Zagreb) po scoreu, bez praga · 50 oglasa</div>
+<div class="filters">
+  <label>Geo <select id="f-geo"><option value="">sve</option><option value="zagreb">zagreb</option></select></label>
+  <label>Tip <select id="f-cat"><option value="">svi</option><option value="kuca">kuca</option><option value="zemljiste">zemljiste</option></select></label>
+  <label>Score ≥ <input id="f-score" type="number" min="0" max="100" value="0" style="width:60px"></label>
+  <label>Flag <select id="f-flag"><option value="">bilo koji</option><option value="djelomicno_gradivo">djelomicno_gradivo</option><option value="duplikati">duplikati</option><option value="k_zona">k_zona</option><option value="kuca_za_rusenje">kuca_za_rusenje</option><option value="llm_pending">llm_pending</option><option value="nagib_gt_25">nagib_gt_25</option><option value="natura_uz_gradnju">natura_uz_gradnju</option><option value="parcelacija">parcelacija</option><option value="upu_obveza">upu_obveza</option><option value="urbano_pravilo_iznimka">urbano_pravilo_iznimka</option><option value="vlasnistvo">vlasnistvo</option><option value="zgrade_bez_rusenja">zgrade_bez_rusenja</option><option value="zona_iz_oglasa">zona_iz_oglasa</option><option value="zona_provjeriti">zona_provjeriti</option><option value="zone_uncertainty">zone_uncertainty</option></select></label>
+  <label>Bez flaga <select id="f-noflag"><option value="">–</option><option value="djelomicno_gradivo">djelomicno_gradivo</option><option value="duplikati">duplikati</option><option value="k_zona">k_zona</option><option value="kuca_za_rusenje">kuca_za_rusenje</option><option value="llm_pending">llm_pending</option><option value="nagib_gt_25">nagib_gt_25</option><option value="natura_uz_gradnju">natura_uz_gradnju</option><option value="parcelacija">parcelacija</option><option value="upu_obveza">upu_obveza</option><option value="urbano_pravilo_iznimka">urbano_pravilo_iznimka</option><option value="vlasnistvo">vlasnistvo</option><option value="zgrade_bez_rusenja">zgrade_bez_rusenja</option><option value="zona_iz_oglasa">zona_iz_oglasa</option><option value="zona_provjeriti">zona_provjeriti</option><option value="zone_uncertainty">zone_uncertainty</option></select></label>
+  <span class="muted" id="f-count"></span>
+</div>
+<div id="map"></div>
+<table id="tbl">
+<thead><tr>
+  <th data-k="id">#</th><th data-k="loc">Lokacija</th><th data-k="geo">Geo</th><th data-k="cat">Tip</th>
+  <th class="num" data-k="area">m²</th><th class="num" data-k="price">Cijena</th><th class="num" data-k="eurm2">€/m²</th>
+  <th data-k="zone">Zona</th><th class="num" data-k="gbp">GBP</th><th class="num" data-k="rlv">RLV €/m²</th>
+  <th class="num" data-k="ratio">Ratio</th><th class="num" data-k="score">Score</th><th data-k="flags">Flagovi</th>
+  <th class="num" data-k="dom">Dana</th><th data-k="fb">Feedback</th>
+</tr></thead>
+<tbody>
+<tr data-id="5030" data-geo="zagreb" data-cat="zemljiste" data-score="49.00"
+    data-flags="vlasnistvo zone_uncertainty llm_pending" data-lat="" data-lng="">
+  <td><a href="listing/5030.html">#5030</a></td>
+  <td>Mikulići, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2000.00">2.000</td>
+  <td class="num" data-v="124900.00">125.000 €</td>
+  <td class="num" data-v="62.45">62</td>
+  <td>–</td>
+  <td class="num" data-v="1200.00">1.200</td>
+  <td class="num" data-v="150.90">151</td>
+  <td class="num" data-v="2.416">2,42</td>
+  <td class="num" data-v="49.00"><span class="score s-lo">49,0</span></td>
+  <td><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4809" data-geo="zagreb" data-cat="zemljiste" data-score="48.94"
+    data-flags="zona_provjeriti natura_uz_gradnju zone_uncertainty djelomicno_gradivo llm_pending" data-lat="45.87316501713558" data-lng="15.997227846164801">
+  <td><a href="listing/4809.html">#4809</a></td>
+  <td>Markuševec, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1987.00">1.987</td>
+  <td class="num" data-v="200000.00">200.000 €</td>
+  <td class="num" data-v="100.65">101</td>
+  <td>Šume</td>
+  <td class="num" data-v="993.10">993</td>
+  <td class="num" data-v="152.98">153</td>
+  <td class="num" data-v="1.520">1,52</td>
+  <td class="num" data-v="48.94"><span class="score s-lo">48,9</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="9846" data-geo="zagreb" data-cat="zemljiste" data-score="48.83"
+    data-flags="zona_provjeriti zone_uncertainty llm_pending" data-lat="45.71481252049251" data-lng="15.807144733003218">
+  <td><a href="listing/9846.html">#9846</a></td>
+  <td>Horvati, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2276.00">2.276</td>
+  <td class="num" data-v="113800.00">114.000 €</td>
+  <td class="num" data-v="50.00">50</td>
+  <td>Šume</td>
+  <td class="num" data-v="1365.60">1.366</td>
+  <td class="num" data-v="85.40">85</td>
+  <td class="num" data-v="1.708">1,71</td>
+  <td class="num" data-v="48.83"><span class="score s-lo">48,8</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7218" data-geo="zagreb" data-cat="zemljiste" data-score="47.58"
+    data-flags="upu_obveza zone_uncertainty zona_provjeriti djelomicno_gradivo kuca_za_rusenje llm_pending" data-lat="45.7930299971874" data-lng="15.985240838659735">
+  <td><a href="listing/7218.html">#7218</a></td>
+  <td>Trnje</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="724.00">724</td>
+  <td class="num" data-v="300000.00">300.000 €</td>
+  <td class="num" data-v="414.36">414</td>
+  <td>M1 · UP 3.1 · kis 2,00</td>
+  <td class="num" data-v="936.86">937</td>
+  <td class="num" data-v="599.47">599</td>
+  <td class="num" data-v="1.447">1,45</td>
+  <td class="num" data-v="47.58"><span class="score s-lo">47,6</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="9022" data-geo="zagreb" data-cat="zemljiste" data-score="45.89"
+    data-flags="zona_provjeriti nagib_gt_25 zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.89080387249979" data-lng="16.032296255829856">
+  <td><a href="listing/9022.html">#9022</a></td>
+  <td>Vidovec, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3230.00">3.230</td>
+  <td class="num" data-v="75000.00">75.000 €</td>
+  <td class="num" data-v="23.22">23</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="1032.57">1.033</td>
+  <td class="num" data-v="71.48">71</td>
+  <td class="num" data-v="3.078">3,08</td>
+  <td class="num" data-v="45.89"><span class="score s-lo">45,9</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4429" data-geo="zagreb" data-cat="zemljiste" data-score="45.40"
+    data-flags="zona_provjeriti nagib_gt_25 zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.8447952977751" data-lng="15.96167721982286">
+  <td><a href="listing/4429.html">#4429</a></td>
+  <td>Prekrižje, Gornji Grad - Medveščak</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="5000.00">5.000</td>
+  <td class="num" data-v="1500000.00">1,5 M€</td>
+  <td class="num" data-v="300.00">300</td>
+  <td>Z · UP 2.13</td>
+  <td class="num" data-v="2232.90">2.233</td>
+  <td class="num" data-v="319.23">319</td>
+  <td class="num" data-v="1.064">1,06</td>
+  <td class="num" data-v="45.40"><span class="score s-lo">45,4</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="9828" data-geo="zagreb" data-cat="zemljiste" data-score="44.79"
+    data-flags="zona_provjeriti zone_uncertainty djelomicno_gradivo llm_pending" data-lat="45.70612088877817" data-lng="15.815578043691254">
+  <td><a href="listing/9828.html">#9828</a></td>
+  <td>Horvati, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1675.00">1.675</td>
+  <td class="num" data-v="83750.00">84.000 €</td>
+  <td class="num" data-v="50.00">50</td>
+  <td>Šume</td>
+  <td class="num" data-v="919.58">920</td>
+  <td class="num" data-v="78.14">78</td>
+  <td class="num" data-v="1.563">1,56</td>
+  <td class="num" data-v="44.79"><span class="score s-lo">44,8</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="36108" data-geo="zagreb" data-cat="zemljiste" data-score="40.62"
+    data-flags="zona_provjeriti upu_obveza zone_uncertainty djelomicno_gradivo llm_pending" data-lat="45.81527132011175" data-lng="15.92174152878613">
+  <td><a href="listing/36108.html">#36108</a></td>
+  <td>Kustošija, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1836.00">1.836</td>
+  <td class="num" data-v="219000.00">219.000 €</td>
+  <td class="num" data-v="119.28">119</td>
+  <td>R2 · UP 3.2</td>
+  <td class="num" data-v="1476.14">1.476</td>
+  <td class="num" data-v="202.21">202</td>
+  <td class="num" data-v="1.695">1,70</td>
+  <td class="num" data-v="40.62"><span class="score s-lo">40,6</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7840" data-geo="zagreb" data-cat="zemljiste" data-score="40.42"
+    data-flags="upu_obveza zgrade_bez_rusenja zone_uncertainty zona_provjeriti urbano_pravilo_iznimka parcelacija djelomicno_gradivo llm_pending" data-lat="45.817113811089" data-lng="15.934601621808222">
+  <td><a href="listing/7840.html">#7840</a></td>
+  <td>Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3600.00">3.600</td>
+  <td class="num" data-v="349990.00">350.000 €</td>
+  <td class="num" data-v="97.22">97</td>
+  <td>M · UP 3.1 · kis 2,00</td>
+  <td class="num" data-v="4011.12">4.011</td>
+  <td class="num" data-v="188.31">188</td>
+  <td class="num" data-v="1.937">1,94</td>
+  <td class="num" data-v="40.42"><span class="score s-lo">40,4</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zgrade na čestici bez spomena rušenja (−10)">zgrade_bez_rusenja</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Zagreb: čestica u iznimci urbanog pravila (posebni lokalni uvjeti) — provjeriti odredbe">urbano_pravilo_iznimka</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="5241" data-geo="zagreb" data-cat="zemljiste" data-score="40.11"
+    data-flags="zona_provjeriti upu_obveza zone_uncertainty djelomicno_gradivo llm_pending" data-lat="45.81586925335336" data-lng="15.918013101172624">
+  <td><a href="listing/5241.html">#5241</a></td>
+  <td>Kustošija, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1153.00">1.153</td>
+  <td class="num" data-v="138000.00">138.000 €</td>
+  <td class="num" data-v="119.69">120</td>
+  <td>R2 · UP 3.2</td>
+  <td class="num" data-v="1532.34">1.532</td>
+  <td class="num" data-v="334.25">334</td>
+  <td class="num" data-v="2.793">2,79</td>
+  <td class="num" data-v="40.11"><span class="score s-lo">40,1</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8244" data-geo="zagreb" data-cat="zemljiste" data-score="34.71"
+    data-flags="upu_obveza nagib_gt_25 zone_uncertainty zona_provjeriti urbano_pravilo_iznimka djelomicno_gradivo llm_pending" data-lat="45.87851451517431" data-lng="16.03672552537974">
+  <td><a href="listing/8244.html">#8244</a></td>
+  <td>Slanovec, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1560.00">1.560</td>
+  <td class="num" data-v="80000.00">80.000 €</td>
+  <td class="num" data-v="51.28">51</td>
+  <td>S · UP 3.2 · kis 1,50</td>
+  <td class="num" data-v="2010.06">2.010</td>
+  <td class="num" data-v="394.40">394</td>
+  <td class="num" data-v="7.691">7,69</td>
+  <td class="num" data-v="34.71"><span class="score s-lo">34,7</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Zagreb: čestica u iznimci urbanog pravila (posebni lokalni uvjeti) — provjeriti odredbe">urbano_pravilo_iznimka</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="375" data-geo="zagreb" data-cat="zemljiste" data-score="34.49"
+    data-flags="zona_provjeriti nagib_gt_25 vlasnistvo djelomicno_gradivo llm_pending" data-lat="45.86187443530346" data-lng="15.999141884940547">
+  <td><a href="listing/375.html">#375</a></td>
+  <td>Bačun, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1081.00">1.081</td>
+  <td class="num" data-v="160000.00">160.000 €</td>
+  <td class="num" data-v="148.01">148</td>
+  <td>R2 · UP 2.10</td>
+  <td class="num" data-v="866.53">867</td>
+  <td class="num" data-v="245.36">245</td>
+  <td class="num" data-v="1.658">1,66</td>
+  <td class="num" data-v="34.49"><span class="score s-lo">34,5</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="562" data-geo="zagreb" data-cat="zemljiste" data-score="32.03"
+    data-flags="upu_obveza nagib_gt_25 zone_uncertainty zona_provjeriti urbano_pravilo_iznimka djelomicno_gradivo llm_pending" data-lat="45.87784284287" data-lng="16.035327908846">
+  <td><a href="listing/562.html">#562</a></td>
+  <td>Slanovec, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1094.00">1.094</td>
+  <td class="num" data-v="24000.00">24.000 €</td>
+  <td class="num" data-v="21.94">22</td>
+  <td>S · UP 3.2 · kis 1,50</td>
+  <td class="num" data-v="1163.47">1.163</td>
+  <td class="num" data-v="325.53">326</td>
+  <td class="num" data-v="14.839">14,84</td>
+  <td class="num" data-v="32.03"><span class="score s-lo">32,0</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Zagreb: čestica u iznimci urbanog pravila (posebni lokalni uvjeti) — provjeriti odredbe">urbano_pravilo_iznimka</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="9420" data-geo="zagreb" data-cat="zemljiste" data-score="28.67"
+    data-flags="upu_obveza vlasnistvo zone_uncertainty zona_provjeriti llm_pending" data-lat="45.81792467227198" data-lng="15.932089703361651">
+  <td><a href="listing/9420.html">#9420</a></td>
+  <td>Kustošija, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1004.00">1.004</td>
+  <td class="num" data-v="155000.00">155.000 €</td>
+  <td class="num" data-v="154.38">154</td>
+  <td>M · UP 3.2 · kis 1,50</td>
+  <td class="num" data-v="1506.00">1.506</td>
+  <td class="num" data-v="377.26">377</td>
+  <td class="num" data-v="2.444">2,44</td>
+  <td class="num" data-v="28.67"><span class="score s-lo">28,7</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4620" data-geo="zagreb" data-cat="zemljiste" data-score="27.30"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo duplikati llm_pending" data-lat="45.83031310169652" data-lng="15.914055705070496">
+  <td><a href="listing/4620.html">#4620</a></td>
+  <td>Kustošija, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3574.00">3.574</td>
+  <td class="num" data-v="499000.00">499.000 €</td>
+  <td class="num" data-v="139.62">140</td>
+  <td>Z · UP 2.13</td>
+  <td class="num" data-v="1437.82">1.438</td>
+  <td class="num" data-v="67.99">68</td>
+  <td class="num" data-v="0.487">0,49</td>
+  <td class="num" data-v="27.30"><span class="score s-lo">27,3</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="isto zemljište kod više agencija">duplikati</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8812" data-geo="zagreb" data-cat="zemljiste" data-score="25.53"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.731117" data-lng="15.800996">
+  <td><a href="listing/8812.html">#8812</a></td>
+  <td>Horvati, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4000.00">4.000</td>
+  <td class="num" data-v="168000.00">168.000 €</td>
+  <td class="num" data-v="42.00">42</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1196.64">1.197</td>
+  <td class="num" data-v="17.90">18</td>
+  <td class="num" data-v="0.426">0,43</td>
+  <td class="num" data-v="25.53"><span class="score s-lo">25,5</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="35959" data-geo="zagreb" data-cat="zemljiste" data-score="23.50"
+    data-flags="upu_obveza vlasnistvo zgrade_bez_rusenja zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.81425560774401" data-lng="15.937324471267662">
+  <td><a href="listing/35959.html">#35959</a></td>
+  <td>Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1800.00">1.800</td>
+  <td class="num" data-v="119000.00">119.000 €</td>
+  <td class="num" data-v="66.11">66</td>
+  <td>M · UP 3.1 · kis 2,00</td>
+  <td class="num" data-v="1310.40">1.310</td>
+  <td class="num" data-v="183.10">183</td>
+  <td class="num" data-v="2.770">2,77</td>
+  <td class="num" data-v="23.50"><span class="score s-lo">23,5</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="zgrade na čestici bez spomena rušenja (−10)">zgrade_bez_rusenja</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="5235" data-geo="zagreb" data-cat="zemljiste" data-score="22.14"
+    data-flags="zona_provjeriti urbano_pravilo_iznimka djelomicno_gradivo llm_pending" data-lat="45.87210376593732" data-lng="16.014912941683935">
+  <td><a href="listing/5235.html">#5235</a></td>
+  <td>Štefanovec, Podsljeme</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2295.00">2.295</td>
+  <td class="num" data-v="635000.00">635.000 €</td>
+  <td class="num" data-v="276.69">277</td>
+  <td>Groblje · UP 2.10</td>
+  <td class="num" data-v="773.87">774</td>
+  <td class="num" data-v="103.21">103</td>
+  <td class="num" data-v="0.373">0,37</td>
+  <td class="num" data-v="22.14"><span class="score s-lo">22,1</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Zagreb: čestica u iznimci urbanog pravila (posebni lokalni uvjeti) — provjeriti odredbe">urbano_pravilo_iznimka</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="3623" data-geo="zagreb" data-cat="zemljiste" data-score="21.81"
+    data-flags="upu_obveza vlasnistvo zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.71172366933163" data-lng="15.816929301627262">
+  <td><a href="listing/3623.html">#3623</a></td>
+  <td>Horvati, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1800.00">1.800</td>
+  <td class="num" data-v="89500.00">90.000 €</td>
+  <td class="num" data-v="49.72">50</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="913.68">914</td>
+  <td class="num" data-v="72.25">72</td>
+  <td class="num" data-v="1.453">1,45</td>
+  <td class="num" data-v="21.81"><span class="score s-lo">21,8</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="6639" data-geo="zagreb" data-cat="zemljiste" data-score="20.39"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.847776" data-lng="15.99193">
+  <td><a href="listing/6639.html">#6639</a></td>
+  <td>Remete, Maksimir</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4353.00">4.353</td>
+  <td class="num" data-v="500000.00">500.000 €</td>
+  <td class="num" data-v="114.86">115</td>
+  <td>Z2 · UP 2.2</td>
+  <td class="num" data-v="874.43">874</td>
+  <td class="num" data-v="12.02">12</td>
+  <td class="num" data-v="0.105">0,10</td>
+  <td class="num" data-v="20.39"><span class="score s-lo">20,4</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="2860" data-geo="zagreb" data-cat="zemljiste" data-score="19.40"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo kuca_za_rusenje llm_pending" data-lat="45.8369415874492" data-lng="15.993469939054865">
+  <td><a href="listing/2860.html">#2860</a></td>
+  <td>Donji Bukovac, Maksimir</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4716.00">4.716</td>
+  <td class="num" data-v="855000.00">855.000 €</td>
+  <td class="num" data-v="181.30">181</td>
+  <td>Z2 · UP 2.2</td>
+  <td class="num" data-v="1112.88">1.113</td>
+  <td class="num" data-v="51.55">52</td>
+  <td class="num" data-v="0.284">0,28</td>
+  <td class="num" data-v="19.40"><span class="score s-lo">19,4</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4651" data-geo="zagreb" data-cat="zemljiste" data-score="16.08"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.660975" data-lng="15.914817">
+  <td><a href="listing/4651.html">#4651</a></td>
+  <td>Donji Trpuci, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3310.00">3.310</td>
+  <td class="num" data-v="145000.00">145.000 €</td>
+  <td class="num" data-v="43.81">44</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1333.40">1.333</td>
+  <td class="num" data-v="-195.78">-196</td>
+  <td class="num" data-v="-4.469">-4,47</td>
+  <td class="num" data-v="16.08"><span class="score s-lo">16,1</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="837" data-geo="zagreb" data-cat="kuca" data-score="15.53"
+    data-flags="natura_uz_gradnju vlasnistvo zone_uncertainty zona_provjeriti kuca_za_rusenje djelomicno_gradivo llm_pending" data-lat="45.817433862421" data-lng="15.97705706650937">
+  <td><a href="listing/837.html">#837</a></td>
+  <td>Gornji grad, Gornji Grad - Medveščak</td>
+  <td>zagreb</td><td>kuca</td>
+  <td class="num" data-v="1451.00">1.451</td>
+  <td class="num" data-v="1150000.00">1,15 M€</td>
+  <td class="num" data-v="792.56">793</td>
+  <td>M1 · UP 1.1 · kis 2,00</td>
+  <td class="num" data-v="1050.52">1.051</td>
+  <td class="num" data-v="554.16">554</td>
+  <td class="num" data-v="0.699">0,70</td>
+  <td class="num" data-v="15.53"><span class="score s-lo">15,5</span></td>
+  <td><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="6235" data-geo="zagreb" data-cat="zemljiste" data-score="15.21"
+    data-flags="zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.75181411617484" data-lng="15.967198696393146">
+  <td><a href="listing/6235.html">#6235</a></td>
+  <td>Sveta Klara, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1450.00">1.450</td>
+  <td class="num" data-v="199000.00">199.000 €</td>
+  <td class="num" data-v="137.24">137</td>
+  <td>Poljoprivredne površine · UP 2.10</td>
+  <td class="num" data-v="871.74">872</td>
+  <td class="num" data-v="-78.50">-78</td>
+  <td class="num" data-v="-0.572">-0,57</td>
+  <td class="num" data-v="15.21"><span class="score s-lo">15,2</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="36096" data-geo="zagreb" data-cat="zemljiste" data-score="14.96"
+    data-flags="zona_provjeriti vlasnistvo llm_pending" data-lat="45.75697691041546" data-lng="16.01376275134435">
+  <td><a href="listing/36096.html">#36096</a></td>
+  <td>Jakuševec, Novi Zagreb - Istok</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1615.00">1.615</td>
+  <td class="num" data-v="370000.00">370.000 €</td>
+  <td class="num" data-v="229.10">229</td>
+  <td>IS · UP 2.10</td>
+  <td class="num" data-v="1938.00">1.938</td>
+  <td class="num" data-v="-25.69">-26</td>
+  <td class="num" data-v="-0.112">-0,11</td>
+  <td class="num" data-v="14.96"><span class="score s-lo">15,0</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="suvlasništvo / tereti / ostavina / plomba (−10)">vlasnistvo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="10230" data-geo="zagreb" data-cat="zemljiste" data-score="14.23"
+    data-flags="zona_provjeriti zone_uncertainty djelomicno_gradivo kuca_za_rusenje llm_pending" data-lat="45.8686799" data-lng="16.0857474">
+  <td><a href="listing/10230.html">#10230</a></td>
+  <td>Novoselec, Gornja Dubrava</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1750.00">1.750</td>
+  <td class="num" data-v="45000.00">45.000 €</td>
+  <td class="num" data-v="25.71">26</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="991.20">991</td>
+  <td class="num" data-v="-75.53">-76</td>
+  <td class="num" data-v="-2.937">-2,94</td>
+  <td class="num" data-v="14.23"><span class="score s-lo">14,2</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7825" data-geo="zagreb" data-cat="zemljiste" data-score="14.18"
+    data-flags="zona_provjeriti natura_uz_gradnju nagib_gt_25 zone_uncertainty parcelacija llm_pending" data-lat="45.84361924389809" data-lng="15.910371890253533">
+  <td><a href="listing/7825.html">#7825</a></td>
+  <td>Krvarić, Črnomerec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4447.00">4.447</td>
+  <td class="num" data-v="733755.00">734.000 €</td>
+  <td class="num" data-v="165.00">165</td>
+  <td>Šume</td>
+  <td class="num" data-v="2401.38">2.401</td>
+  <td class="num" data-v="91.26">91</td>
+  <td class="num" data-v="0.553">0,55</td>
+  <td class="num" data-v="14.18"><span class="score s-lo">14,2</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="Natura/zaštićeno područje uz građevinsku zonu — posebni uvjeti (−5)">natura_uz_gradnju</span><span class="flag" title="nagib &gt; 25 % (−10)">nagib_gt_25</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="10044" data-geo="zagreb" data-cat="zemljiste" data-score="13.94"
+    data-flags="upu_obveza zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.710272732932644" data-lng="15.814761228387407">
+  <td><a href="listing/10044.html">#10044</a></td>
+  <td>Horvati, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1657.00">1.657</td>
+  <td class="num" data-v="132560.00">133.000 €</td>
+  <td class="num" data-v="80.00">80</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="878.87">879</td>
+  <td class="num" data-v="75.50">76</td>
+  <td class="num" data-v="0.944">0,94</td>
+  <td class="num" data-v="13.94"><span class="score s-lo">13,9</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="6419" data-geo="zagreb" data-cat="zemljiste" data-score="13.83"
+    data-flags="upu_obveza zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.82583818619043" data-lng="15.855641404664455">
+  <td><a href="listing/6419.html">#6419</a></td>
+  <td>Stenjevec</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4593.60">4.594</td>
+  <td class="num" data-v="250000.00">250.000 €</td>
+  <td class="num" data-v="54.42">54</td>
+  <td>M1 · UP 3.1 · kis 2,00</td>
+  <td class="num" data-v="3051.07">3.051</td>
+  <td class="num" data-v="-69.02">-69</td>
+  <td class="num" data-v="-1.268">-1,27</td>
+  <td class="num" data-v="13.83"><span class="score s-lo">13,8</span></td>
+  <td><span class="flag" title="obveza UPU/DPU (−15)">upu_obveza</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="6043" data-geo="zagreb" data-cat="zemljiste" data-score="13.75"
+    data-flags="zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.727290613782" data-lng="16.007921839826">
+  <td><a href="listing/6043.html">#6043</a></td>
+  <td>Hrašće Turopoljsko, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1465.00">1.465</td>
+  <td class="num" data-v="130000.00">130.000 €</td>
+  <td class="num" data-v="88.74">89</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="794.62">795</td>
+  <td class="num" data-v="-70.83">-71</td>
+  <td class="num" data-v="-0.798">-0,80</td>
+  <td class="num" data-v="13.75"><span class="score s-lo">13,8</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="5242" data-geo="zagreb" data-cat="zemljiste" data-score="13.54"
+    data-flags="zona_provjeriti zone_uncertainty djelomicno_gradivo llm_pending" data-lat="45.85381894524958" data-lng="15.993651229046302">
+  <td><a href="listing/5242.html">#5242</a></td>
+  <td>Remete, Maksimir</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1714.00">1.714</td>
+  <td class="num" data-v="430000.00">430.000 €</td>
+  <td class="num" data-v="250.88">251</td>
+  <td>Z2</td>
+  <td class="num" data-v="958.47">958</td>
+  <td class="num" data-v="79.60">80</td>
+  <td class="num" data-v="0.317">0,32</td>
+  <td class="num" data-v="13.54"><span class="score s-lo">13,5</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4648" data-geo="zagreb" data-cat="zemljiste" data-score="13.46"
+    data-flags="zone_uncertainty zona_provjeriti k_zona djelomicno_gradivo llm_pending" data-lat="45.754207" data-lng="16.003419">
+  <td><a href="listing/4648.html">#4648</a></td>
+  <td>Buzin, Novi Zagreb - Istok</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1717.00">1.717</td>
+  <td class="num" data-v="380000.00">380.000 €</td>
+  <td class="num" data-v="221.32">221</td>
+  <td>K1 · UP 3.2 · kis 1,00</td>
+  <td class="num" data-v="1150.39">1.150</td>
+  <td class="num" data-v="-16.75">-17</td>
+  <td class="num" data-v="-0.076">-0,08</td>
+  <td class="num" data-v="13.46"><span class="score s-lo">13,5</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="K zona — model najma">k_zona</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4830" data-geo="zagreb" data-cat="zemljiste" data-score="13.41"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.764961225070586" data-lng="15.873780200970774">
+  <td><a href="listing/4830.html">#4830</a></td>
+  <td>Lučko, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3739.00">3.739</td>
+  <td class="num" data-v="435000.00">435.000 €</td>
+  <td class="num" data-v="116.34">116</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="1304.31">1.304</td>
+  <td class="num" data-v="-74.33">-74</td>
+  <td class="num" data-v="-0.639">-0,64</td>
+  <td class="num" data-v="13.41"><span class="score s-lo">13,4</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="146" data-geo="zagreb" data-cat="zemljiste" data-score="13.35"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.808779398818174" data-lng="16.13705670233708">
+  <td><a href="listing/146.html">#146</a></td>
+  <td>Trdica, Sesvete</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3400.00">3.400</td>
+  <td class="num" data-v="100000.00">100.000 €</td>
+  <td class="num" data-v="29.41">29</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="1321.92">1.322</td>
+  <td class="num" data-v="-167.73">-168</td>
+  <td class="num" data-v="-5.703">-5,70</td>
+  <td class="num" data-v="13.35"><span class="score s-lo">13,3</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="4235" data-geo="zagreb" data-cat="zemljiste" data-score="13.28"
+    data-flags="zone_uncertainty k_zona zona_iz_oglasa llm_pending" data-lat="" data-lng="">
+  <td><a href="listing/4235.html">#4235</a></td>
+  <td>Jačkovina, Podsused - Vrapče</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2995.00">2.995</td>
+  <td class="num" data-v="305000.00">305.000 €</td>
+  <td class="num" data-v="101.84">102</td>
+  <td>–</td>
+  <td class="num" data-v="1797.00">1.797</td>
+  <td class="num" data-v="-15.00">-15</td>
+  <td class="num" data-v="-0.147">-0,15</td>
+  <td class="num" data-v="13.28"><span class="score s-lo">13,3</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="K zona — model najma">k_zona</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="7638" data-geo="zagreb" data-cat="zemljiste" data-score="13.26"
+    data-flags="zona_provjeriti zone_uncertainty llm_pending" data-lat="45.87405" data-lng="16.079449">
+  <td><a href="listing/7638.html">#7638</a></td>
+  <td>Jalševec, Gornja Dubrava</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2348.00">2.348</td>
+  <td class="num" data-v="39000.00">39.000 €</td>
+  <td class="num" data-v="16.61">17</td>
+  <td>Z</td>
+  <td class="num" data-v="1408.80">1.409</td>
+  <td class="num" data-v="-78.35">-78</td>
+  <td class="num" data-v="-4.717">-4,72</td>
+  <td class="num" data-v="13.26"><span class="score s-lo">13,3</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="365" data-geo="zagreb" data-cat="zemljiste" data-score="13.03"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.746886198745" data-lng="15.900805489419">
+  <td><a href="listing/365.html">#365</a></td>
+  <td>Hrvatski Leskovac, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4364.00">4.364</td>
+  <td class="num" data-v="300000.00">300.000 €</td>
+  <td class="num" data-v="68.74">69</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1107.58">1.108</td>
+  <td class="num" data-v="-123.35">-123</td>
+  <td class="num" data-v="-1.794">-1,79</td>
+  <td class="num" data-v="13.03"><span class="score s-lo">13,0</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="7007" data-geo="zagreb" data-cat="zemljiste" data-score="12.78"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.813810000000004" data-lng="16.12631">
+  <td><a href="listing/7007.html">#7007</a></td>
+  <td>Sesvete</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3596.00">3.596</td>
+  <td class="num" data-v="199998.00">200.000 €</td>
+  <td class="num" data-v="55.62">56</td>
+  <td>M1-1 · kis 1,50</td>
+  <td class="num" data-v="1116.56">1.117</td>
+  <td class="num" data-v="-133.95">-134</td>
+  <td class="num" data-v="-2.409">-2,41</td>
+  <td class="num" data-v="12.78"><span class="score s-lo">12,8</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8211" data-geo="zagreb" data-cat="zemljiste" data-score="12.64"
+    data-flags="zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.72852640685615" data-lng="16.002884563847978">
+  <td><a href="listing/8211.html">#8211</a></td>
+  <td>Hrašće Turopoljsko, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1827.00">1.827</td>
+  <td class="num" data-v="155000.00">155.000 €</td>
+  <td class="num" data-v="84.84">85</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1030.43">1.030</td>
+  <td class="num" data-v="-73.65">-74</td>
+  <td class="num" data-v="-0.868">-0,87</td>
+  <td class="num" data-v="12.64"><span class="score s-lo">12,6</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="568" data-geo="zagreb" data-cat="zemljiste" data-score="12.63"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.813810000000004" data-lng="16.12631">
+  <td><a href="listing/568.html">#568</a></td>
+  <td>Soblinec, Sesvete</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4219.00">4.219</td>
+  <td class="num" data-v="310000.00">310.000 €</td>
+  <td class="num" data-v="73.48">73</td>
+  <td>M1-1 · kis 1,50</td>
+  <td class="num" data-v="1310.00">1.310</td>
+  <td class="num" data-v="-133.95">-134</td>
+  <td class="num" data-v="-1.823">-1,82</td>
+  <td class="num" data-v="12.63"><span class="score s-lo">12,6</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="6648" data-geo="zagreb" data-cat="zemljiste" data-score="12.59"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.662574" data-lng="15.870433">
+  <td><a href="listing/6648.html">#6648</a></td>
+  <td>Kupinečki Kraljevec, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4788.00">4.788</td>
+  <td class="num" data-v="220000.00">220.000 €</td>
+  <td class="num" data-v="45.95">46</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1559.07">1.559</td>
+  <td class="num" data-v="-158.25">-158</td>
+  <td class="num" data-v="-3.444">-3,44</td>
+  <td class="num" data-v="12.59"><span class="score s-lo">12,6</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4427" data-geo="zagreb" data-cat="zemljiste" data-score="12.52"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija llm_pending" data-lat="45.70678461561741" data-lng="15.971302165442708">
+  <td><a href="listing/4427.html">#4427</a></td>
+  <td>Odra, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4288.00">4.288</td>
+  <td class="num" data-v="364480.00">364.000 €</td>
+  <td class="num" data-v="85.00">85</td>
+  <td>Šume</td>
+  <td class="num" data-v="2315.52">2.316</td>
+  <td class="num" data-v="-115.06">-115</td>
+  <td class="num" data-v="-1.354">-1,35</td>
+  <td class="num" data-v="12.52"><span class="score s-lo">12,5</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="35643" data-geo="zagreb" data-cat="zemljiste" data-score="12.32"
+    data-flags="zone_uncertainty zona_provjeriti djelomicno_gradivo llm_pending" data-lat="45.7500172" data-lng="15.9626301">
+  <td><a href="listing/35643.html">#35643</a></td>
+  <td>Gornji Čehi, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2087.00">2.087</td>
+  <td class="num" data-v="180000.00">180.000 €</td>
+  <td class="num" data-v="86.25">86</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="785.13">785</td>
+  <td class="num" data-v="-49.12">-49</td>
+  <td class="num" data-v="-0.570">-0,57</td>
+  <td class="num" data-v="12.32"><span class="score s-lo">12,3</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="4444" data-geo="zagreb" data-cat="zemljiste" data-score="12.11"
+    data-flags="zona_provjeriti zone_uncertainty llm_pending" data-lat="45.7476715776462" data-lng="15.987751914034646">
+  <td><a href="listing/4444.html">#4444</a></td>
+  <td>Buzin, Novi Zagreb - Istok</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="2534.00">2.534</td>
+  <td class="num" data-v="560000.00">560.000 €</td>
+  <td class="num" data-v="220.99">221</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="1520.40">1.520</td>
+  <td class="num" data-v="-12.85">-13</td>
+  <td class="num" data-v="-0.058">-0,06</td>
+  <td class="num" data-v="12.11"><span class="score s-lo">12,1</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="12095" data-geo="zagreb" data-cat="kuca" data-score="11.86"
+    data-flags="zone_uncertainty zona_provjeriti kuca_za_rusenje djelomicno_gradivo llm_pending" data-lat="45.72763213701079" data-lng="16.00158349417137">
+  <td><a href="listing/12095.html">#12095</a></td>
+  <td>Hrašće Turopoljsko, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>kuca</td>
+  <td class="num" data-v="1452.00">1.452</td>
+  <td class="num" data-v="104000.00">104.000 €</td>
+  <td class="num" data-v="71.63">72</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="798.02">798</td>
+  <td class="num" data-v="-75.53">-76</td>
+  <td class="num" data-v="-1.054">-1,05</td>
+  <td class="num" data-v="11.86"><span class="score s-lo">11,9</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="kuća za rušenje">kuca_za_rusenje</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8839" data-geo="zagreb" data-cat="zemljiste" data-score="11.85"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija djelomicno_gradivo llm_pending" data-lat="45.82544690505559" data-lng="15.860513281551494">
+  <td><a href="listing/8839.html">#8839</a></td>
+  <td>Bizek, Podsused - Vrapče</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4897.00">4.897</td>
+  <td class="num" data-v="342790.00">343.000 €</td>
+  <td class="num" data-v="70.00">70</td>
+  <td>Z · UP 3.1</td>
+  <td class="num" data-v="1470.28">1.470</td>
+  <td class="num" data-v="-80.36">-80</td>
+  <td class="num" data-v="-1.148">-1,15</td>
+  <td class="num" data-v="11.85"><span class="score s-lo">11,8</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="10199" data-geo="zagreb" data-cat="zemljiste" data-score="11.79"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.666726338474" data-lng="15.871390713012">
+  <td><a href="listing/10199.html">#10199</a></td>
+  <td>Kupinečki Kraljevec, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4920.00">4.920</td>
+  <td class="num" data-v="160000.00">160.000 €</td>
+  <td class="num" data-v="32.52">33</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1689.72">1.690</td>
+  <td class="num" data-v="-166.91">-167</td>
+  <td class="num" data-v="-5.132">-5,13</td>
+  <td class="num" data-v="11.79"><span class="score s-lo">11,8</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="579" data-geo="zagreb" data-cat="zemljiste" data-score="11.70"
+    data-flags="zona_provjeriti zone_uncertainty llm_pending" data-lat="45.7251527690778" data-lng="15.995213728147611">
+  <td><a href="listing/579.html">#579</a></td>
+  <td>Hrašće Turopoljsko, Novi Zagreb - Zapad</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="1826.00">1.826</td>
+  <td class="num" data-v="155000.00">155.000 €</td>
+  <td class="num" data-v="84.88">85</td>
+  <td>Poljoprivredne površine</td>
+  <td class="num" data-v="1095.60">1.096</td>
+  <td class="num" data-v="-78.35">-78</td>
+  <td class="num" data-v="-0.923">-0,92</td>
+  <td class="num" data-v="11.70"><span class="score s-lo">11,7</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">3</td>
+  <td></td>
+</tr>
+<tr data-id="5047" data-geo="zagreb" data-cat="zemljiste" data-score="11.53"
+    data-flags="zone_uncertainty zona_provjeriti parcelacija djelomicno_gradivo llm_pending" data-lat="45.71620366994589" data-lng="15.937163780440502">
+  <td><a href="listing/5047.html">#5047</a></td>
+  <td>Odranski Obrež, Brezovica</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="4610.00">4.610</td>
+  <td class="num" data-v="290000.00">290.000 €</td>
+  <td class="num" data-v="62.91">63</td>
+  <td>Pretežito stambena namjena</td>
+  <td class="num" data-v="1623.09">1.623</td>
+  <td class="num" data-v="-171.11">-171</td>
+  <td class="num" data-v="-2.720">-2,72</td>
+  <td class="num" data-v="11.53"><span class="score s-lo">11,5</span></td>
+  <td><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="djelomicno_gradivo">djelomicno_gradivo</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+<tr data-id="8220" data-geo="zagreb" data-cat="zemljiste" data-score="11.41"
+    data-flags="zona_provjeriti zone_uncertainty parcelacija zona_iz_oglasa llm_pending" data-lat="45.797970409930365" data-lng="16.132091640573176">
+  <td><a href="listing/8220.html">#8220</a></td>
+  <td>Ivanja Reka, Peščenica - Žitnjak</td>
+  <td>zagreb</td><td>zemljiste</td>
+  <td class="num" data-v="3710.00">3.710</td>
+  <td class="num" data-v="445200.00">445.000 €</td>
+  <td class="num" data-v="120.00">120</td>
+  <td>–</td>
+  <td class="num" data-v="2003.40">2.003</td>
+  <td class="num" data-v="-85.59">-86</td>
+  <td class="num" data-v="-0.713">-0,71</td>
+  <td class="num" data-v="11.41"><span class="score s-lo">11,4</span></td>
+  <td><span class="flag" title="zona iz geokodiranja — provjeriti (−5)">zona_provjeriti</span><span class="flag" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span><span class="flag" title="fazni projekt / parcelacija">parcelacija</span><span class="flag" title="zona preuzeta iz teksta oglasa (bez GIS-a)">zona_iz_oglasa</span><span class="flag" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span></td>
+  <td class="num">2</td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var MARKERS = [{&#34;id&#34;: 4809, &#34;lat&#34;: 45.87316501713558, &#34;lng&#34;: 15.997227846164801, &#34;score&#34;: 48.94, &#34;href&#34;: &#34;listing/4809.html&#34;, &#34;label&#34;: &#34;#4809 · Markuševec · 200.000 €&#34;}, {&#34;id&#34;: 9846, &#34;lat&#34;: 45.71481252049251, &#34;lng&#34;: 15.807144733003218, &#34;score&#34;: 48.83, &#34;href&#34;: &#34;listing/9846.html&#34;, &#34;label&#34;: &#34;#9846 · Horvati · 114.000 €&#34;}, {&#34;id&#34;: 7218, &#34;lat&#34;: 45.7930299971874, &#34;lng&#34;: 15.985240838659735, &#34;score&#34;: 47.58, &#34;href&#34;: &#34;listing/7218.html&#34;, &#34;label&#34;: &#34;#7218 · Trnje · 300.000 €&#34;}, {&#34;id&#34;: 9022, &#34;lat&#34;: 45.89080387249979, &#34;lng&#34;: 16.032296255829856, &#34;score&#34;: 45.89, &#34;href&#34;: &#34;listing/9022.html&#34;, &#34;label&#34;: &#34;#9022 · Vidovec · 75.000 €&#34;}, {&#34;id&#34;: 4429, &#34;lat&#34;: 45.8447952977751, &#34;lng&#34;: 15.96167721982286, &#34;score&#34;: 45.4, &#34;href&#34;: &#34;listing/4429.html&#34;, &#34;label&#34;: &#34;#4429 · Prekrižje · 1,5 M€&#34;}, {&#34;id&#34;: 9828, &#34;lat&#34;: 45.70612088877817, &#34;lng&#34;: 15.815578043691254, &#34;score&#34;: 44.79, &#34;href&#34;: &#34;listing/9828.html&#34;, &#34;label&#34;: &#34;#9828 · Horvati · 84.000 €&#34;}, {&#34;id&#34;: 36108, &#34;lat&#34;: 45.81527132011175, &#34;lng&#34;: 15.92174152878613, &#34;score&#34;: 40.62, &#34;href&#34;: &#34;listing/36108.html&#34;, &#34;label&#34;: &#34;#36108 · Kustošija · 219.000 €&#34;}, {&#34;id&#34;: 7840, &#34;lat&#34;: 45.817113811089, &#34;lng&#34;: 15.934601621808222, &#34;score&#34;: 40.42, &#34;href&#34;: &#34;listing/7840.html&#34;, &#34;label&#34;: &#34;#7840 · Črnomerec · 350.000 €&#34;}, {&#34;id&#34;: 5241, &#34;lat&#34;: 45.81586925335336, &#34;lng&#34;: 15.918013101172624, &#34;score&#34;: 40.11, &#34;href&#34;: &#34;listing/5241.html&#34;, &#34;label&#34;: &#34;#5241 · Kustošija · 138.000 €&#34;}, {&#34;id&#34;: 8244, &#34;lat&#34;: 45.87851451517431, &#34;lng&#34;: 16.03672552537974, &#34;score&#34;: 34.71, &#34;href&#34;: &#34;listing/8244.html&#34;, &#34;label&#34;: &#34;#8244 · Slanovec · 80.000 €&#34;}, {&#34;id&#34;: 375, &#34;lat&#34;: 45.86187443530346, &#34;lng&#34;: 15.999141884940547, &#34;score&#34;: 34.49, &#34;href&#34;: &#34;listing/375.html&#34;, &#34;label&#34;: &#34;#375 · Bačun · 160.000 €&#34;}, {&#34;id&#34;: 562, &#34;lat&#34;: 45.87784284287, &#34;lng&#34;: 16.035327908846, &#34;score&#34;: 32.03, &#34;href&#34;: &#34;listing/562.html&#34;, &#34;label&#34;: &#34;#562 · Slanovec · 24.000 €&#34;}, {&#34;id&#34;: 9420, &#34;lat&#34;: 45.81792467227198, &#34;lng&#34;: 15.932089703361651, &#34;score&#34;: 28.67, &#34;href&#34;: &#34;listing/9420.html&#34;, &#34;label&#34;: &#34;#9420 · Kustošija · 155.000 €&#34;}, {&#34;id&#34;: 4620, &#34;lat&#34;: 45.83031310169652, &#34;lng&#34;: 15.914055705070496, &#34;score&#34;: 27.3, &#34;href&#34;: &#34;listing/4620.html&#34;, &#34;label&#34;: &#34;#4620 · Kustošija · 499.000 €&#34;}, {&#34;id&#34;: 8812, &#34;lat&#34;: 45.731117, &#34;lng&#34;: 15.800996, &#34;score&#34;: 25.53, &#34;href&#34;: &#34;listing/8812.html&#34;, &#34;label&#34;: &#34;#8812 · Horvati · 168.000 €&#34;}, {&#34;id&#34;: 35959, &#34;lat&#34;: 45.81425560774401, &#34;lng&#34;: 15.937324471267662, &#34;score&#34;: 23.5, &#34;href&#34;: &#34;listing/35959.html&#34;, &#34;label&#34;: &#34;#35959 · Črnomerec · 119.000 €&#34;}, {&#34;id&#34;: 5235, &#34;lat&#34;: 45.87210376593732, &#34;lng&#34;: 16.014912941683935, &#34;score&#34;: 22.14, &#34;href&#34;: &#34;listing/5235.html&#34;, &#34;label&#34;: &#34;#5235 · Štefanovec · 635.000 €&#34;}, {&#34;id&#34;: 3623, &#34;lat&#34;: 45.71172366933163, &#34;lng&#34;: 15.816929301627262, &#34;score&#34;: 21.81, &#34;href&#34;: &#34;listing/3623.html&#34;, &#34;label&#34;: &#34;#3623 · Horvati · 90.000 €&#34;}, {&#34;id&#34;: 6639, &#34;lat&#34;: 45.847776, &#34;lng&#34;: 15.99193, &#34;score&#34;: 20.39, &#34;href&#34;: &#34;listing/6639.html&#34;, &#34;label&#34;: &#34;#6639 · Remete · 500.000 €&#34;}, {&#34;id&#34;: 2860, &#34;lat&#34;: 45.8369415874492, &#34;lng&#34;: 15.993469939054865, &#34;score&#34;: 19.4, &#34;href&#34;: &#34;listing/2860.html&#34;, &#34;label&#34;: &#34;#2860 · Donji Bukovac · 855.000 €&#34;}, {&#34;id&#34;: 4651, &#34;lat&#34;: 45.660975, &#34;lng&#34;: 15.914817, &#34;score&#34;: 16.08, &#34;href&#34;: &#34;listing/4651.html&#34;, &#34;label&#34;: &#34;#4651 · Donji Trpuci · 145.000 €&#34;}, {&#34;id&#34;: 837, &#34;lat&#34;: 45.817433862421, &#34;lng&#34;: 15.97705706650937, &#34;score&#34;: 15.53, &#34;href&#34;: &#34;listing/837.html&#34;, &#34;label&#34;: &#34;#837 · Gornji grad · 1,15 M€&#34;}, {&#34;id&#34;: 6235, &#34;lat&#34;: 45.75181411617484, &#34;lng&#34;: 15.967198696393146, &#34;score&#34;: 15.21, &#34;href&#34;: &#34;listing/6235.html&#34;, &#34;label&#34;: &#34;#6235 · Sveta Klara · 199.000 €&#34;}, {&#34;id&#34;: 36096, &#34;lat&#34;: 45.75697691041546, &#34;lng&#34;: 16.01376275134435, &#34;score&#34;: 14.96, &#34;href&#34;: &#34;listing/36096.html&#34;, &#34;label&#34;: &#34;#36096 · Jakuševec · 370.000 €&#34;}, {&#34;id&#34;: 10230, &#34;lat&#34;: 45.8686799, &#34;lng&#34;: 16.0857474, &#34;score&#34;: 14.23, &#34;href&#34;: &#34;listing/10230.html&#34;, &#34;label&#34;: &#34;#10230 · Novoselec · 45.000 €&#34;}, {&#34;id&#34;: 7825, &#34;lat&#34;: 45.84361924389809, &#34;lng&#34;: 15.910371890253533, &#34;score&#34;: 14.18, &#34;href&#34;: &#34;listing/7825.html&#34;, &#34;label&#34;: &#34;#7825 · Krvarić · 734.000 €&#34;}, {&#34;id&#34;: 10044, &#34;lat&#34;: 45.710272732932644, &#34;lng&#34;: 15.814761228387407, &#34;score&#34;: 13.94, &#34;href&#34;: &#34;listing/10044.html&#34;, &#34;label&#34;: &#34;#10044 · Horvati · 133.000 €&#34;}, {&#34;id&#34;: 6419, &#34;lat&#34;: 45.82583818619043, &#34;lng&#34;: 15.855641404664455, &#34;score&#34;: 13.83, &#34;href&#34;: &#34;listing/6419.html&#34;, &#34;label&#34;: &#34;#6419 · Stenjevec · 250.000 €&#34;}, {&#34;id&#34;: 6043, &#34;lat&#34;: 45.727290613782, &#34;lng&#34;: 16.007921839826, &#34;score&#34;: 13.75, &#34;href&#34;: &#34;listing/6043.html&#34;, &#34;label&#34;: &#34;#6043 · Hrašće Turopoljsko · 130.000 €&#34;}, {&#34;id&#34;: 5242, &#34;lat&#34;: 45.85381894524958, &#34;lng&#34;: 15.993651229046302, &#34;score&#34;: 13.54, &#34;href&#34;: &#34;listing/5242.html&#34;, &#34;label&#34;: &#34;#5242 · Remete · 430.000 €&#34;}, {&#34;id&#34;: 4648, &#34;lat&#34;: 45.754207, &#34;lng&#34;: 16.003419, &#34;score&#34;: 13.46, &#34;href&#34;: &#34;listing/4648.html&#34;, &#34;label&#34;: &#34;#4648 · Buzin · 380.000 €&#34;}, {&#34;id&#34;: 4830, &#34;lat&#34;: 45.764961225070586, &#34;lng&#34;: 15.873780200970774, &#34;score&#34;: 13.41, &#34;href&#34;: &#34;listing/4830.html&#34;, &#34;label&#34;: &#34;#4830 · Lučko · 435.000 €&#34;}, {&#34;id&#34;: 146, &#34;lat&#34;: 45.808779398818174, &#34;lng&#34;: 16.13705670233708, &#34;score&#34;: 13.35, &#34;href&#34;: &#34;listing/146.html&#34;, &#34;label&#34;: &#34;#146 · Trdica · 100.000 €&#34;}, {&#34;id&#34;: 7638, &#34;lat&#34;: 45.87405, &#34;lng&#34;: 16.079449, &#34;score&#34;: 13.26, &#34;href&#34;: &#34;listing/7638.html&#34;, &#34;label&#34;: &#34;#7638 · Jalševec · 39.000 €&#34;}, {&#34;id&#34;: 365, &#34;lat&#34;: 45.746886198745, &#34;lng&#34;: 15.900805489419, &#34;score&#34;: 13.03, &#34;href&#34;: &#34;listing/365.html&#34;, &#34;label&#34;: &#34;#365 · Hrvatski Leskovac · 300.000 €&#34;}, {&#34;id&#34;: 7007, &#34;lat&#34;: 45.813810000000004, &#34;lng&#34;: 16.12631, &#34;score&#34;: 12.78, &#34;href&#34;: &#34;listing/7007.html&#34;, &#34;label&#34;: &#34;#7007 · Sesvete · 200.000 €&#34;}, {&#34;id&#34;: 8211, &#34;lat&#34;: 45.72852640685615, &#34;lng&#34;: 16.002884563847978, &#34;score&#34;: 12.64, &#34;href&#34;: &#34;listing/8211.html&#34;, &#34;label&#34;: &#34;#8211 · Hrašće Turopoljsko · 155.000 €&#34;}, {&#34;id&#34;: 568, &#34;lat&#34;: 45.813810000000004, &#34;lng&#34;: 16.12631, &#34;score&#34;: 12.63, &#34;href&#34;: &#34;listing/568.html&#34;, &#34;label&#34;: &#34;#568 · Soblinec · 310.000 €&#34;}, {&#34;id&#34;: 6648, &#34;lat&#34;: 45.662574, &#34;lng&#34;: 15.870433, &#34;score&#34;: 12.59, &#34;href&#34;: &#34;listing/6648.html&#34;, &#34;label&#34;: &#34;#6648 · Kupinečki Kraljevec · 220.000 €&#34;}, {&#34;id&#34;: 4427, &#34;lat&#34;: 45.70678461561741, &#34;lng&#34;: 15.971302165442708, &#34;score&#34;: 12.52, &#34;href&#34;: &#34;listing/4427.html&#34;, &#34;label&#34;: &#34;#4427 · Odra · 364.000 €&#34;}, {&#34;id&#34;: 35643, &#34;lat&#34;: 45.7500172, &#34;lng&#34;: 15.9626301, &#34;score&#34;: 12.32, &#34;href&#34;: &#34;listing/35643.html&#34;, &#34;label&#34;: &#34;#35643 · Gornji Čehi · 180.000 €&#34;}, {&#34;id&#34;: 4444, &#34;lat&#34;: 45.7476715776462, &#34;lng&#34;: 15.987751914034646, &#34;score&#34;: 12.11, &#34;href&#34;: &#34;listing/4444.html&#34;, &#34;label&#34;: &#34;#4444 · Buzin · 560.000 €&#34;}, {&#34;id&#34;: 12095, &#34;lat&#34;: 45.72763213701079, &#34;lng&#34;: 16.00158349417137, &#34;score&#34;: 11.86, &#34;href&#34;: &#34;listing/12095.html&#34;, &#34;label&#34;: &#34;#12095 · Hrašće Turopoljsko · 104.000 €&#34;}, {&#34;id&#34;: 8839, &#34;lat&#34;: 45.82544690505559, &#34;lng&#34;: 15.860513281551494, &#34;score&#34;: 11.85, &#34;href&#34;: &#34;listing/8839.html&#34;, &#34;label&#34;: &#34;#8839 · Bizek · 343.000 €&#34;}, {&#34;id&#34;: 10199, &#34;lat&#34;: 45.666726338474, &#34;lng&#34;: 15.871390713012, &#34;score&#34;: 11.79, &#34;href&#34;: &#34;listing/10199.html&#34;, &#34;label&#34;: &#34;#10199 · Kupinečki Kraljevec · 160.000 €&#34;}, {&#34;id&#34;: 579, &#34;lat&#34;: 45.7251527690778, &#34;lng&#34;: 15.995213728147611, &#34;score&#34;: 11.7, &#34;href&#34;: &#34;listing/579.html&#34;, &#34;label&#34;: &#34;#579 · Hrašće Turopoljsko · 155.000 €&#34;}, {&#34;id&#34;: 5047, &#34;lat&#34;: 45.71620366994589, &#34;lng&#34;: 15.937163780440502, &#34;score&#34;: 11.53, &#34;href&#34;: &#34;listing/5047.html&#34;, &#34;label&#34;: &#34;#5047 · Odranski Obrež · 290.000 €&#34;}, {&#34;id&#34;: 8220, &#34;lat&#34;: 45.797970409930365, &#34;lng&#34;: 16.132091640573176, &#34;score&#34;: 11.41, &#34;href&#34;: &#34;listing/8220.html&#34;, &#34;label&#34;: &#34;#8220 · Ivanja Reka · 445.000 €&#34;}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var layer = L.layerGroup().addTo(map);
+function color(s){ return s >= 70 ? '#0b6e4f' : (s >= 55 ? '#b3540f' : '#888'); }
+function drawMarkers(ids){
+  layer.clearLayers(); var pts = [];
+  MARKERS.forEach(function(m){ if (ids && !ids.has(m.id)) return; if (!m.lat || !m.lng) return;
+    L.circleMarker([m.lat, m.lng], {radius: 7, color: color(m.score||0), fillOpacity: .8}).bindPopup('<a href="'+m.href+'">'+m.label+'</a> · score '+(m.score||'–')).addTo(layer); pts.push([m.lat, m.lng]); });
+  if (pts.length) map.fitBounds(pts, {padding:[20,20]}); else map.setView([45.1, 15.2], 7);
+}
+function applyFilters(){
+  var geo = document.getElementById('f-geo').value, cat = document.getElementById('f-cat').value,
+      sc = parseFloat(document.getElementById('f-score').value||0), fl = document.getElementById('f-flag').value,
+      nf = document.getElementById('f-noflag').value, n = 0, ids = new Set();
+  document.querySelectorAll('#tbl tbody tr').forEach(function(tr){
+    var flags = tr.dataset.flags.split(' ');
+    var ok = (!geo || tr.dataset.geo === geo) && (!cat || tr.dataset.cat === cat) && parseFloat(tr.dataset.score) >= sc
+          && (!fl || flags.indexOf(fl) >= 0) && (!nf || flags.indexOf(nf) < 0);
+    tr.style.display = ok ? '' : 'none'; if (ok) { n++; ids.add(parseInt(tr.dataset.id)); }
+  });
+  document.getElementById('f-count').textContent = n + ' prikazano'; drawMarkers(ids);
+}
+['f-geo','f-cat','f-score','f-flag','f-noflag'].forEach(function(id){ document.getElementById(id).addEventListener('input', applyFilters); });
+document.querySelectorAll('#tbl th').forEach(function(th, i){ th.addEventListener('click', function(){
+  var tb = th.closest('table').querySelector('tbody'), rows = Array.from(tb.querySelectorAll('tr'));
+  var asc = th.dataset.asc !== '1'; th.dataset.asc = asc ? '1' : '0';
+  rows.sort(function(a,b){ var ca=a.children[i], cb=b.children[i]; var va = ca.dataset.v !== undefined ? parseFloat(ca.dataset.v) : ca.textContent.trim().toLowerCase();
+    var vb = cb.dataset.v !== undefined ? parseFloat(cb.dataset.v) : cb.textContent.trim().toLowerCase(); return (va > vb ? 1 : va < vb ? -1 : 0) * (asc ? 1 : -1); });
+  rows.forEach(function(r){ tb.appendChild(r); }); }); });
+applyFilters();
+</script>
+</body>
+</html>

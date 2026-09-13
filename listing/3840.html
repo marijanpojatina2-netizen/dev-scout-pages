@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title></title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+  :root { --bg:#f7f7f5; --fg:#1b1b1b; --muted:#666; --line:#ddd; --acc:#0b6e4f; --warn:#b3540f; --bad:#a8232a; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--fg); background:var(--bg); }
+  header { background:#fff; border-bottom:1px solid var(--line); padding:10px 18px; display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; font-weight:600; }
+  header .gen { margin-left:auto; color:var(--muted); font-size:12px; }
+  main { padding:16px 18px; max-width:1400px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 8px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+  .sub { color:var(--muted); margin-bottom:12px; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:#efefeb; position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  .score { font-weight:700; padding:2px 6px; border-radius:4px; color:#fff; display:inline-block; min-width:28px; text-align:center; }
+  .s-hi { background:var(--acc);} .s-mid { background:var(--warn);} .s-lo { background:#888; }
+  .flag { display:inline-block; font-size:11px; background:#eee; border:1px solid #ccc; border-radius:3px; padding:0 5px; margin:1px 2px 1px 0; }
+  .flag.hard { background:#f8d7da; border-color:#e3a1a6; } .flag.soft { background:#fff3cd; border-color:#e8d48b; }
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0; align-items:center; }
+  .filters label { font-size:12px; color:var(--muted); } .filters select, .filters input { padding:3px 6px; }
+  #map { height:420px; border:1px solid var(--line); margin:10px 0; background:#e9eef2; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:6px; padding:12px; }
+  dl { display:grid; grid-template-columns:max-content 1fr; gap:3px 12px; margin:0; } dt { color:var(--muted); } dd { margin:0; }
+  pre { background:#fff; border:1px solid var(--line); padding:10px; overflow:auto; white-space:pre-wrap; }
+  .muted { color:var(--muted); } .kbd { font-family:ui-monospace, monospace; }
+  img.dof { max-width:100%; border:1px solid var(--line); }
+  .report { background:#fff; border:1px solid var(--line); padding:18px 24px; max-width:900px; }
+  .report table td { border:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">DEV-SCOUT</a>
+  <a href="../ispod_praga.html">Ispod praga</a>
+  <a href="../offmarket.html">Off-market</a>
+  <a href="../deepdive/index.html">Deep-dive</a>
+  <a href="../review/index.html">Self-review</a>
+  <a href="../stats.html">Statistika</a>
+  <span class="gen">generirano 12.09.2026. 08:30</span>
+</header>
+<main>
+<h1>#3840 · Zagreb (Markuševec),građ. zemlj.1600m2 sa idejnim rješenjem za 3 stana</h1>
+<div class="sub">Markuševec, Podsljeme, Grad Zagreb · zemljiste · njuskalo · status active · <a href="https://www.njuskalo.hr/nekretnine/zagreb-markusevec-gradevinsko-zemlj-gradevinskom-dozvolom-1600m2-oglas-49762931" rel="noopener">oglas ↗</a></div>
+<div class="grid">
+  <div class="card"><h2 style="margin-top:0">Ocjena</h2>
+    <dl>
+      <dt>Score</dt><dd><span class="score s-mid">65</span>
+        <span class="muted">rule 65 · LLM – · 12.09.2026.</span></dd>
+      <dt>RLV</dt><dd>122.000 € (76 €/m²) · ratio <b>1,02</b></dd>
+      <dt>Ukupna investicija</dt><dd>944.000 €</dd>
+      <dt>GBP</dt><dd>400 m²</dd>
+      <dt>Feedback</dt><dd>–</dd>
+      <dt>CRM</dt><dd>–</dd>
+    </dl>
+<p><b>Sažetak:</b> Prodaje se građevinsko zemljište od 1.602 m2 u Markuševcu (Zagreb, Podsljeme), prema lokacijskoj informaciji dijelom u stambenoj zoni S (cca 1.050 m2) uz najveću izgrađenost 20% i koeficijent iskorištenosti 0,5, s izrađenim idejnim rješenjem za tri dvoetažna stana. Za obiteljsku kuću je 2007. bila izdana građevinska dozvola, no za projekt od tri stana prema idejnom rješenju dozvola u tekstu nije navedena kao ishođena.</p>  </div>
+  <div class="card"><h2 style="margin-top:0">Oglas</h2>
+    <dl>
+      <dt>Cijena</dt><dd>120.000 € (75 €/m²)</dd>
+      <dt>Površina</dt><dd>1.600 m² · DKP 1.607 m² (odstupanje 0,4 %)</dd>
+      <dt>Prodavatelj</dt><dd>agencija · RE/MAX Commercial, Unitas Nekretnine d.o.o.</dd>
+      <dt>Prvi put</dt><dd>11.09.2026. · zadnje 11.09.2026. · 0 d na tržištu</dd>
+    </dl>
+    <h2>Povijest cijene</h2>
+    <table><tr><th>Datum</th><th class="num">Cijena</th></tr><tr><td>11.09.2026.</td><td class="num">120.000 €</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">Flagovi</h2>
+<span class="flag soft" title="zona nije pregledana (reviewed: false) (−5)">zone_uncertainty</span> zona nije pregledana (reviewed: false) (−5)<br><span class="flag soft" title="djelomicno_gradivo">djelomicno_gradivo</span> djelomicno_gradivo<br><span class="flag soft" title="GBP preuzet iz oglasa (gbp_claim)">gbp_iz_oglasa</span> GBP preuzet iz oglasa (gbp_claim)<br><span class="flag soft" title="LLM ekstrakcija/ocjena nedostupna">llm_pending</span> LLM ekstrakcija/ocjena nedostupna<br>    <h2>Komponente score-a</h2>
+    <table><tr><td>rlv</td><td class="num">{&#39;gbp&#39;: 400.0, &#39;kis&#39;: 1.2, &#39;nkp&#39;: 328.0, &#39;noi&#39;: None, &#39;rlv&#39;: 122435.82608695654, &#39;ratio&#39;: 1.0202985507246378, &#39;value&#39;: None, &#39;phases&#39;: 1, &#39;profile&#39;: &#39;zagreb_visestambeno&#39;, &#39;gdv_neto&#39;: 1128320.0, &#39;cost_soft&#39;: 26400.0, &#39;gdv_bruto&#39;: 1410400.0, &#39;kis_known&#39;: True, &#39;total_inv&#39;: 943600.0, &#39;cost_build&#39;: 660000.0, &#39;cost_other&#39;: 130000.0, &#39;cost_sales&#39;: 42312.0, &#39;demolition&#39;: False, &#39;gbp_source&#39;: &#39;min(kis,gbp_claim)&#39;, &#39;rlv_per_m2&#39;: 76.1999701805215, &#39;parcel_area&#39;: 1606.77, &#39;parcelation&#39;: False, &#39;roi_on_cost&#39;: 0.150919881305638, &#39;profit_at_ask&#39;: 142408.0, &#39;cost_demolition&#39;: 0.0, &#39;total_inv_phase&#39;: 943600.0, &#39;parcel_area_effective&#39;: 1058.86143, &#39;sale_price_per_m2_nkp&#39;: 4300.0}</td></tr><tr><td>hard</td><td class="num">[]</td></tr><tr><td>info</td><td class="num">[&#39;djelomicno_gradivo&#39;, &#39;gbp_iz_oglasa&#39;, &#39;llm_pending&#39;]</td></tr><tr><td>rubric</td><td class="num">{&#39;permits&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;permit&#39;: &#39;gradjevinska&#39;}, &#39;points&#39;: 10.0}, &#39;physical&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;slope_pct&#39;: 15.43, &#39;road_access&#39;: &#39;yes&#39;, &#39;slope_points&#39;: 2.914}, &#39;points&#39;: 5.91}, &#39;liquidity&#39;: {&#39;max&#39;: 10.0, &#39;detail&#39;: {&#39;n_cuts&#39;: 0, &#39;points_cut&#39;: 0.0, &#39;points_days&#39;: 0.03333333333333333, &#39;seller_type&#39;: &#39;agencija&#39;, &#39;points_fresh&#39;: 1.0, &#39;price_cut_pct&#39;: None, &#39;days_on_market&#39;: 1, &#39;points_private&#39;: 0}, &#39;points&#39;: 1.03}, &#39;rlv_ratio&#39;: {&#39;max&#39;: 40.0, &#39;detail&#39;: {&#39;rlv&#39;: 122436, &#39;ratio&#39;: 1.02, &#39;asking_price&#39;: 120000.0}, &#39;points&#39;: 25.61}, &#39;zone_quality&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;no_upu&#39;: True, &#39;source&#39;: &#39;gis&#39;, &#39;zone_class&#39;: &#39;stambeno&#39;, &#39;zone_ideal&#39;: True, &#39;gp_uredjeni&#39;: True}, &#39;points&#39;: 12.0}, &#39;price_vs_benchmark&#39;: {&#39;max&#39;: 15.0, &#39;detail&#39;: {&#39;source&#39;: &#39;auto:Podsljeme&#39;, &#39;deviation&#39;: 0.531, &#39;ask_eur_m2&#39;: 75, &#39;benchmark_eur_m2&#39;: 160.0}, &#39;points&#39;: 15.0}}</td></tr><tr><td>weights</td><td class="num">{&#39;llm&#39;: 0.4, &#39;rule&#39;: 0.6, &#39;model&#39;: 0.0}</td></tr><tr><td>penalties</td><td class="num">{&#39;zone_uncertainty&#39;: 5}</td></tr><tr><td>raw_score</td><td class="num">69,5</td></tr><tr><td>rlv_notes</td><td class="num">[&#39;gradivo 66 % čestice (1059 m²) — ostatak izvan gradive zone&#39;]</td></tr><tr><td>flag_notes</td><td class="num">{&#39;max_gbp&#39;: 1928, &#39;total_inv&#39;: 943600, &#39;zone_code&#39;: &#39;S&#39;, &#39;zone_class&#39;: &#39;stambeno&#39;, &#39;zone_source&#39;: &#39;gis&#39;, &#39;zone_reviewed&#39;: False, &#39;commercial_pct&#39;: 0.0, &#39;commercial_source&#39;: &#39;zone_rule&#39;}</td></tr><tr><td>caps_applied</td><td class="num">[]</td></tr></table>
+  </div>
+  <div class="card"><h2 style="margin-top:0">GIS</h2>
+    <dl>
+      <dt>Čestica</dt><dd>k.o. 335347, k.č. 14520 (pin_buffer, 0,85); k.o. 335347, k.č. 12930 (pin_buffer, 0,80); k.o. 335347, k.č. 14528 (pin_buffer, 0,79)</dd>
+      <dt>Zona</dt><dd>S (stambeno) · NIJE pregledana</dd>
+      <dt>kig / kis / katnost</dt><dd>0,30 / 1,20 / Po+P+2+Pk</dd>
+      <dt>GP / UPU</dt><dd>uredjeni · UPU ne</dd>
+      <dt>Pristup / nagib</dt><dd>yes · 15,4 % (max 17,4 %)</dd>
+      <dt>More</dt><dd>–</dd>
+      <dt>Zaštite</dt><dd>Natura ne · zaštićeno ne · kulturno dobro ne</dd>
+      <dt>Zgrade na čestici</dt><dd>0 %</dd>
+      <dt>Match</dt><dd>0,85</dd>
+    </dl>
+  </div>
+</div>
+<h2>Karta</h2>
+<div id="map"></div>
+<h2>Ortofoto (DOF)</h2><img class="dof" src="../img/3840.png" alt="DOF izrez"><h2>RLV kalkulacija — pretpostavke</h2>
+<div class="card"><table><tr><td>gbp</td><td class="num">{&#39;value&#39;: 400.0, &#39;source&#39;: &#39;min(kis,gbp_claim)&#39;}</td></tr><tr><td>kis</td><td class="num">{&#39;value&#39;: 1.2, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>soft_pct</td><td class="num">{&#39;value&#39;: 0.04, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>nkp_ratio</td><td class="num">{&#39;value&#39;: 0.82, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>cost_other</td><td class="num">{&#39;value&#39;: 130000.0, &#39;source&#39;: &#39;profil: doprinosi+uređenje po m² GBP, financiranje+rezerva % gradnje&#39;}</td></tr><tr><td>zone_share</td><td class="num">{&#39;value&#39;: 0.659, &#39;source&#39;: &#39;gis&#39;}</td></tr><tr><td>parcel_area</td><td class="num">{&#39;value&#39;: 1606.77, &#39;source&#39;: &#39;dkp&#39;}</td></tr><tr><td>asking_price</td><td class="num">{&#39;value&#39;: 120000.0, &#39;source&#39;: &#39;oglas&#39;}</td></tr><tr><td>margin_on_cost</td><td class="num">{&#39;value&#39;: 0.15, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>build_cost_per_m2_gbp</td><td class="num">{&#39;value&#39;: 1650.0, &#39;source&#39;: &#39;profil&#39;}</td></tr><tr><td>sale_price_per_m2_nkp</td><td class="num">{&#39;value&#39;: 4300.0, &#39;source&#39;: &#39;benchmark:seed:Podsljeme&#39;}</td></tr><tr><td>transfer_tax_and_acquisition</td><td class="num">{&#39;value&#39;: 0.06, &#39;source&#39;: &#39;profil&#39;}</td></tr></table></div>
+<h2>Ekstrakcija iz oglasa</h2>
+<div class="card"><table><tr><td>permit</td><td>gradjevinska</td></tr><tr><td>gbp_claim</td><td>400.0</td></tr><tr><td>kig_claim</td><td>0.2</td></tr><tr><td>kis_claim</td><td>0.5</td></tr><tr><td>zone_claim</td><td>S</td></tr><tr><td>permit_date</td><td>2007</td></tr><tr><td>floors_claim</td><td>P+1 (potkrovlje ili uvučeni kat)</td></tr><tr><td>sea_row_claim</td><td>none</td></tr><tr><td>permit_content</td><td>izdana 2007. za izgradnju obiteljske kuće; za trenutni projekt od 3 stana postoji samo idejno rješenje temeljem lokacijske informacije</td></tr><tr><td>building_on_parcel</td><td>none</td></tr></table></div>
+<h2>Opis oglasa</h2><pre>GRAĐEVINSKO ZEMLJIŠTE 1.602 m² – MARKUŠEVEC, FRUŠČINJE s idejnim rješenjem za 3 stana 
+Na prodaju je građevinsko zemljište površine 1.602 m² smješteno u mirnoj ulici Fruščinje u Markuševcu, jednoj od najpoželjnijih rezidencijalnih zona istočnog dijela Zagreba. 
+Parcela se nalazi u drugom redu od glavne prometnice, što budućim vlasnicima osigurava dodatni mir, privatnost i ugodno okruženje za stanovanje. U neposrednoj blizini nalaze se javni prijevoz, škole, vrtići, sportski sadržaji, trgovine i svi ostali sadržaji potrebni za kvalitetan obiteljski život. 
+PREMA VAŽEĆOJ LOKACIJSKOJ INFORMACIJI: 
+• približno 1.050 m² nalazi se u zoni stambene namjene (S) 
+• ostatak zemljišta nalazi se unutar zelene zone (Z) 
+• najveća izgrađenost građevne čestice: 20% 
+• najveći koeficijent iskorištenosti (ki): 0,5 
+• najveći GBP za samostojeću građevinu: 400 m² 
+• najveća dopuštena visina: dvije nadzemne etaže, pri čemu se druga etaža oblikuje kao potkrovlje ili uvučeni kat 
+ZA ZEMLJIŠTE JE IZRAĐENO IDEJNO RJEŠENJE 
+Na temelju uvjeta gradnje iz lokacijske informacije izrađeno je idejno rješenje za izgradnju tri moderna dvoetažna stana s garažama i privatnim vrtovima. 
+Predviđeni stanovi sastoje se od: 
+PRIZEMLJE 
+• dnevni boravak s blagovaonicom 
+• kuhinja 
+• ulazni prostor 
+• gostinjski WC 
+KAT 
+• tri spavaće sobe 
+• kupaonica 
+• terasa 
+Dodatno su predviđene garaže površine 17,80 m² te privatni vrtovi za svaki stan. 
+DODATNA INFORMACIJA 
+Za predmetno zemljište je 2007. godine bila izdana građevinska dozvola za izgradnju obiteljske kuće, što potvrđuje dugogodišnji građevinski potencijal lokacije. 
+PREDNOSTI NEKRETNINE 
+✓ velika parcela površine 1.602 m² 
+✓ mirna lokacija u okruženju obiteljskih kuća 
+✓ stambena zona 
+✓ izrađeno idejno rješenje 
+✓ odličan potencijal za investicijski projekt ili gradnju za vlastite potrebe 
+✓ dobra prometna povezanost sa središtem Zagreba 
+Sve informacije smatraju se pouzdanima, ali ih zainteresirani kupci trebaju samostalno provjeriti. 
+Kupac plaća agencijsku proviziju u iznosu od 2% + PDV. 
+Za dodatne informacije i razgledavanje: 
+Ivana Farac 
+M: 091 3355 004 
+RE/MAX Commercial</pre></main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+var LAT = 45.86946451297397, LNG = 16.00660264492035;
+var PARCELS = [{&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[16.006277021, 45.869552474], [16.006233966, 45.869440085], [16.006173998, 45.869332031], [16.006134414, 45.869220377], [16.00676058, 45.868690138], [16.006780976, 45.868816106], [16.006779729, 45.868884305], [16.006765764, 45.868934092], [16.006691012, 45.869041294], [16.006466361, 45.869218032], [16.006456758, 45.869226089], [16.006362545, 45.869319889], [16.006337767, 45.869383487], [16.006345408, 45.869538913], [16.00628319, 45.869568607], [16.006277021, 45.869552474]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[16.005984703, 45.870489958], [16.006003809, 45.870499668], [16.005688815, 45.870840944], [16.005633907, 45.870903152], [16.005574967, 45.870969751], [16.005592343, 45.870985752], [16.005580925, 45.871009547], [16.005453281, 45.87115431], [16.005362655, 45.871133673], [16.00531367, 45.871123383], [16.00530454, 45.871121724], [16.005530619, 45.870799679], [16.005680753, 45.870617042], [16.006082451, 45.870215495], [16.006165556, 45.870314381], [16.006065286, 45.870408335], [16.005984703, 45.870489958]]]]}, {&#34;type&#34;: &#34;MultiPolygon&#34;, &#34;coordinates&#34;: [[[[16.007927028, 45.868732148], [16.007922257, 45.868732758], [16.007906399, 45.868734399], [16.007612869, 45.868762468], [16.007303596, 45.868793707], [16.007294153, 45.868448418], [16.007909713, 45.868417329], [16.007929941, 45.868416606], [16.007927028, 45.868732148]]]]}];
+var map = L.map('map');
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(map);
+var bounds = null;
+PARCELS.forEach(function(g){ var lyr = L.geoJSON(g, {style: {color:'#a8232a', weight:2, fillOpacity:.15}}).addTo(map); bounds = bounds ? bounds.extend(lyr.getBounds()) : lyr.getBounds(); });
+if (LAT && LNG) { L.marker([LAT, LNG]).addTo(map).bindPopup('pin oglasa (approx)'); }
+if (bounds) map.fitBounds(bounds.pad(0.5)); else if (LAT && LNG) map.setView([LAT, LNG], 17); else map.setView([45.1, 15.2], 7);
+</script>
+</body>
+</html>
